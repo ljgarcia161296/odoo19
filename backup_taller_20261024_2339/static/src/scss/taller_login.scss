@@ -1,0 +1,24 @@
+// Pantalla de inicio de sesión con la marca del taller
+html, body {
+    background: linear-gradient(135deg, #0f4c5c 0%, #17798f 55%, #1fa3b5 100%) !important;
+    min-height: 100vh;
+}
+.card.o_database_list {
+    border-radius: 16px;
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.28);
+}
+.card.o_database_list .card-body > div:first-child::after {
+    content: 'Taller de Servicios Técnicos';
+    display: block;
+    margin-top: 10px;
+    font-weight: 700;
+    color: #0f4c5c;
+}
+.btn-primary {
+    background-color: #0f4c5c !important;
+    border-color: #0f4c5c !important;
+}
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #17798f !important;
+    border-color: #17798f !important;
+}

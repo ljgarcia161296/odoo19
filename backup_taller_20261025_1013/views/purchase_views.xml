@@ -1,0 +1,139 @@
+<odoo>
+    <record id="view_service_purchase_tree" model="ir.ui.view">
+        <field name="name">service.purchase.tree</field>
+        <field name="model">service.purchase</field>
+        <field name="arch" type="xml">
+            <list string="Compras de repuestos" decoration-muted="state == 'cancel'"
+                  decoration-success="state == 'received'">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <field name="date"/>
+                <field name="state" widget="badge"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="total" sum="Total"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_service_purchase_form" model="ir.ui.view">
+        <field name="name">service.purchase.form</field>
+        <field name="model">service.purchase</field>
+        <field name="arch" type="xml">
+            <form string="Compra de repuestos">
+                <header>
+                    <button name="action_order" string="Marcar pedida" type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_receive" string="Recibir" type="object" class="btn-primary"
+                            invisible="state not in ['draft', 'ordered']"
+                            confirm="Se sumará el stock de todos los repuestos de esta compra. ¿Continuar?"/>
+                    <button name="action_cancel" string="Cancelar" type="object"
+                            invisible="state not in ['draft', 'ordered']"/>
+                    <button name="action_draft" string="Volver a borrador" type="object"
+                            invisible="state != 'cancel'"/>
+                    <button name="%(action_report_purchase)d" string="Imprimir" type="action"/>
+                    <field name="state" widget="statusbar" statusbar_visible="draft,ordered,received"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="partner_id"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Repuestos">
+                            <field name="line_ids" readonly="state in ['received', 'cancel']">
+                                <list editable="bottom">
+                                    <field name="part_id"/>
+                                    <field name="quantity"/>
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="unit_cost"/>
+                                    <field name="subtotal"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="total" class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+                        <page string="Notas">
+                            <field name="note"/>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_service_purchase_search" model="ir.ui.view">
+        <field name="name">service.purchase.search</field>
+        <field name="model">service.purchase</field>
+        <field name="arch" type="xml">
+            <search string="Compras">
+                <field name="name"/>
+                <field name="partner_id"/>
+                <filter name="f_pending" string="Pendientes" domain="[('state', 'in', ['draft', 'ordered'])]"/>
+                <filter name="f_received" string="Recibidas" domain="[('state', '=', 'received')]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_service_part_tree_purchase" model="ir.ui.view">
+        <field name="name">service.part.tree.purchase</field>
+        <field name="model">service.part</field>
+        <field name="inherit_id" ref="view_service_part_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='code']" position="before">
+                <header>
+                    <button name="action_create_purchase" string="Crear orden de compra" type="object"/>
+                </header>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_part_form_chatter" model="ir.ui.view">
+        <field name="name">service.part.form.chatter</field>
+        <field name="model">service.part</field>
+        <field name="inherit_id" ref="view_service_part_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//sheet" position="after">
+                <chatter/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_order_form_notify" model="ir.ui.view">
+        <field name="name">service.order.form.notify</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='customer_phone']" position="after">
+                <field name="notify_customer" invisible="not partner_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_service_purchase" model="ir.actions.act_window">
+        <field name="name">Compras de repuestos</field>
+        <field name="res_model">service.purchase</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_suggest_purchase" model="ir.actions.server">
+        <field name="name">Compra sugerida (stock bajo)</field>
+        <field name="model_id" ref="model_service_part"/>
+        <field name="state">code</field>
+        <field name="code">action = model.action_suggest_purchase()</field>
+    </record>
+
+    <menuitem id="menu_taller_suggest_purchase" name="Compra sugerida (stock bajo)"
+              parent="menu_taller_inventory" action="action_suggest_purchase" sequence="25"/>
+    <menuitem id="menu_taller_purchases" name="Compras" parent="menu_taller_inventory"
+              action="action_service_purchase" sequence="30"/>
+</odoo>

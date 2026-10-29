@@ -1,0 +1,129 @@
+<odoo>
+    <record id="view_service_part_form_suppliers" model="ir.ui.view">
+        <field name="name">service.part.form.suppliers</field>
+        <field name="model">service.part</field>
+        <field name="inherit_id" ref="view_service_part_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//notebook" position="inside">
+                <page string="Proveedores">
+                    <field name="supplier_ids">
+                        <list editable="bottom">
+                            <field name="sequence" widget="handle"/>
+                            <field name="partner_id"/>
+                            <field name="supplier_code"/>
+                            <field name="currency_id" invisible="1"/>
+                            <field name="price"/>
+                            <field name="lead_days"/>
+                            <field name="last_update" readonly="1"/>
+                        </list>
+                    </field>
+                </page>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_part_supplier_tree" model="ir.ui.view">
+        <field name="name">service.part.supplier.tree</field>
+        <field name="model">service.part.supplier</field>
+        <field name="arch" type="xml">
+            <list string="Precios de proveedores" create="false">
+                <field name="part_id"/>
+                <field name="partner_id"/>
+                <field name="supplier_code"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="price"/>
+                <field name="lead_days"/>
+                <field name="last_update"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_service_part_supplier_pivot" model="ir.ui.view">
+        <field name="name">service.part.supplier.pivot</field>
+        <field name="model">service.part.supplier</field>
+        <field name="arch" type="xml">
+            <pivot string="Precios de proveedores">
+                <field name="part_id" type="row"/>
+                <field name="partner_id" type="col"/>
+                <field name="price" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="view_service_order_form_tanda5" model="ir.ui.view">
+        <field name="name">service.order.form.tanda5</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_device_history" type="object" class="oe_stat_button"
+                        icon="fa-history" invisible="history_count == 0">
+                    <field name="history_count" widget="statinfo" string="Historial del equipo"/>
+                </button>
+            </xpath>
+            <xpath expr="//sheet" position="inside">
+                <field name="recurrent_flag" invisible="1"/>
+                <widget name="web_ribbon" title="Reincidencia" bg_color="text-bg-warning"
+                        invisible="recurrent_flag == 0"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_order_kanban_tanda5" model="ir.ui.view">
+        <field name="name">service.order.kanban.tanda5</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_kanban_global_click')]" position="inside">
+                <field name="recurrent_flag" invisible="1"/>
+                <div t-if="record.recurrent_flag.raw_value" class="text-warning fw-bold">Reincidencia</div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_order_search_tanda5" model="ir.ui.view">
+        <field name="name">service.order.search.tanda5</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='f_mine']" position="after">
+                <filter name="f_recurrent" string="Reincidencias" domain="[('recurrent_flag', '=', 1)]"/>
+                <filter name="f_quote_stale" string="Presupuestos sin respuesta"
+                        domain="[('status', '=', 'quote'), ('quote_date', '&lt;=', (context_today() - datetime.timedelta(days=3)).strftime('%Y-%m-%d'))]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_most_repaired_pivot" model="ir.ui.view">
+        <field name="name">service.order.pivot.most.repaired</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <pivot string="Equipos más reparados">
+                <field name="device_brand" type="row"/>
+                <field name="device_model" type="row"/>
+                <field name="order_qty" type="measure"/>
+                <field name="recurrent_flag" type="measure"/>
+                <field name="total" type="measure"/>
+            </pivot>
+        </field>
+    </record>
+
+    <record id="action_supplier_prices" model="ir.actions.act_window">
+        <field name="name">Precios de proveedores</field>
+        <field name="res_model">service.part.supplier</field>
+        <field name="view_mode">pivot,list</field>
+    </record>
+
+    <record id="action_most_repaired" model="ir.actions.act_window">
+        <field name="name">Equipos más reparados</field>
+        <field name="res_model">service.order</field>
+        <field name="view_mode">pivot</field>
+        <field name="view_id" ref="view_most_repaired_pivot"/>
+        <field name="search_view_id" ref="view_service_order_search"/>
+    </record>
+
+    <menuitem id="menu_taller_supplier_prices" name="Precios de proveedores"
+              parent="menu_taller_inventory" action="action_supplier_prices" sequence="35"/>
+    <menuitem id="menu_taller_most_repaired" name="Equipos más reparados"
+              parent="menu_taller_reports" action="action_most_repaired" sequence="80"/>
+</odoo>

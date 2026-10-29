@@ -1,0 +1,61 @@
+<odoo>
+    <record id="view_service_order_form_partner" model="ir.ui.view">
+        <field name="name">service.order.form.partner</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='customer_name']" position="before">
+                <field name="partner_id" required="1"/>
+                <field name="customer_phone"/>
+            </xpath>
+            <xpath expr="//field[@name='customer_name']" position="attributes">
+                <attribute name="invisible">partner_id or not id</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_order_tree_partner" model="ir.ui.view">
+        <field name="name">service.order.tree.partner</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='customer_name']" position="attributes">
+                <attribute name="string">Cliente</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_order_search_partner" model="ir.ui.view">
+        <field name="name">service.order.search.partner</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='customer_name']" position="after">
+                <field name="customer_phone"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_partner_form_service_orders" model="ir.ui.view">
+        <field name="name">res.partner.form.service.orders</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[@name='button_box']" position="inside">
+                <button name="action_view_service_orders" type="object" class="oe_stat_button"
+                        icon="fa-wrench" groups="taller.group_taller_technician">
+                    <field name="service_order_count" widget="statinfo" string="Órdenes"/>
+                </button>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_taller_clientes" model="ir.actions.act_window">
+        <field name="name">Clientes</field>
+        <field name="res_model">res.partner</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+
+    <menuitem id="menu_taller_clientes" name="Clientes" parent="menu_taller_root"
+              action="action_taller_clientes" sequence="20"/>
+</odoo>

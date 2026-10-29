@@ -1,0 +1,86 @@
+<odoo>
+    <record id="view_dash_income_month" model="ir.ui.view">
+        <field name="name">service.order.graph.income.month</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <graph string="Ingresos por mes" type="bar">
+                <field name="date_received" interval="month"/>
+                <field name="total" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_dash_status_pie" model="ir.ui.view">
+        <field name="name">service.order.graph.status.pie</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <graph string="Estado de las órdenes" type="pie">
+                <field name="status"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_dash_device_pie" model="ir.ui.view">
+        <field name="name">service.order.graph.device.pie</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <graph string="Equipos recibidos" type="pie">
+                <field name="device_type"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="view_dash_income_user" model="ir.ui.view">
+        <field name="name">service.order.graph.income.user</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <graph string="Ingresos por técnico" type="bar">
+                <field name="user_id"/>
+                <field name="total" type="measure"/>
+            </graph>
+        </field>
+    </record>
+
+    <record id="action_dash_income_month" model="ir.actions.act_window">
+        <field name="name">Ingresos por mes</field>
+        <field name="res_model">service.order</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_dash_income_month"/>
+        <field name="search_view_id" ref="view_service_order_search"/>
+        <field name="context">{'search_default_f_delivered': 1}</field>
+    </record>
+
+    <record id="action_dash_status_pie" model="ir.actions.act_window">
+        <field name="name">Estado de las órdenes</field>
+        <field name="res_model">service.order</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_dash_status_pie"/>
+        <field name="search_view_id" ref="view_service_order_search"/>
+    </record>
+
+    <record id="action_dash_device_pie" model="ir.actions.act_window">
+        <field name="name">Equipos recibidos</field>
+        <field name="res_model">service.order</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_dash_device_pie"/>
+        <field name="search_view_id" ref="view_service_order_search"/>
+    </record>
+
+    <record id="action_dash_income_user" model="ir.actions.act_window">
+        <field name="name">Ingresos por técnico</field>
+        <field name="res_model">service.order</field>
+        <field name="view_mode">graph</field>
+        <field name="view_id" ref="view_dash_income_user"/>
+        <field name="search_view_id" ref="view_service_order_search"/>
+        <field name="context">{'search_default_f_delivered': 1}</field>
+    </record>
+
+    <menuitem id="menu_dash_income_month" name="Ingresos por mes" parent="menu_taller_reports"
+              action="action_dash_income_month" sequence="1"/>
+    <menuitem id="menu_dash_status_pie" name="Estado de las órdenes" parent="menu_taller_reports"
+              action="action_dash_status_pie" sequence="2"/>
+    <menuitem id="menu_dash_device_pie" name="Equipos recibidos" parent="menu_taller_reports"
+              action="action_dash_device_pie" sequence="3"/>
+    <menuitem id="menu_dash_income_user" name="Ingresos por técnico" parent="menu_taller_reports"
+              action="action_dash_income_user" sequence="4"/>
+</odoo>

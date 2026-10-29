@@ -1,0 +1,55 @@
+<odoo>
+    <record id="view_service_order_form_warranty" model="ir.ui.view">
+        <field name="name">service.order.form.warranty</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='date_finished']" position="after">
+                <field name="warranty_days"/>
+                <field name="warranty_end"/>
+                <field name="warranty_status" widget="badge"
+                       decoration-success="warranty_status == 'active'"
+                       decoration-danger="warranty_status == 'expired'"
+                       invisible="warranty_status == 'none'"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_order_tree_warranty" model="ir.ui.view">
+        <field name="name">service.order.tree.warranty</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='status']" position="after">
+                <field name="warranty_end" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_order_search_warranty" model="ir.ui.view">
+        <field name="name">service.order.search.warranty</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='f_mine']" position="after">
+                <filter name="f_warranty" string="En garantía"
+                        domain="[('warranty_end', '&gt;=', context_today().strftime('%Y-%m-%d'))]"/>
+                <filter name="f_warranty_expired" string="Garantía vencida"
+                        domain="[('warranty_end', '&lt;', context_today().strftime('%Y-%m-%d'))]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <template id="report_service_order_warranty" inherit_id="report_service_order">
+        <xpath expr="//div[hasclass('page')]" position="inside">
+            <t t-if="o.warranty_end">
+                <p class="mt-4">
+                    <strong>Garantía:</strong>
+                    <span t-field="o.warranty_days"/> días, hasta el <span t-field="o.warranty_end"/>.
+                    Cubre únicamente la reparación realizada y los repuestos instalados.
+                    No cubre golpes, humedad ni mal uso.
+                </p>
+            </t>
+        </xpath>
+    </template>
+</odoo>

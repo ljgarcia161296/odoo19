@@ -1,0 +1,273 @@
+<odoo>
+    <!-- ============ Formulario de la orden (rediseñado) ============ -->
+    <record id="view_service_order_form_v2" model="ir.ui.view">
+        <field name="name">service.order.form.v2</field>
+        <field name="model">service.order</field>
+        <field name="priority">1</field>
+        <field name="arch" type="xml">
+            <form string="Orden de Servicio" class="o_taller_form">
+                <header>
+                    <button name="action_start_diagnosis" string="Iniciar diagnóstico" type="object"
+                            class="btn-primary" invisible="status != 'draft'"/>
+                    <button name="action_send_quote" string="Enviar presupuesto" type="object"
+                            invisible="status != 'diagnosing'"/>
+                    <button name="action_start_repair" string="Iniciar reparación" type="object"
+                            class="btn-primary" invisible="status != 'diagnosing'"/>
+                    <button name="action_approve_quote" string="Aprobar presupuesto" type="object"
+                            class="btn-primary" invisible="status != 'quote'"/>
+                    <button name="action_reject_quote" string="Rechazar presupuesto" type="object"
+                            invisible="status != 'quote'" confirm="La orden se cancelará. ¿Continuar?"/>
+                    <button name="action_done" string="Marcar listo" type="object"
+                            class="btn-primary" invisible="status != 'repairing'"/>
+                    <button name="action_deliver" string="Entregar" type="object"
+                            class="btn-primary" invisible="status != 'done'"/>
+                    <button name="action_create_invoice" string="Crear factura" type="object"
+                            groups="taller.group_taller_manager"
+                            invisible="status not in ['done', 'delivered'] or invoice_id"/>
+                    <button name="action_warranty_reentry" string="Reingreso por garantía" type="object"
+                            invisible="status != 'delivered'"/>
+                    <button name="action_cancel" string="Cancelar" type="object"
+                            invisible="status in ['delivered', 'cancel']"/>
+                    <button name="action_reset_draft" string="Volver a recibido" type="object"
+                            invisible="status != 'cancel'"/>
+                    <field name="status" widget="statusbar"
+                           statusbar_visible="draft,diagnosing,quote,repairing,done,delivered"/>
+                </header>
+                <sheet>
+                    <field name="recurrent_flag" invisible="1"/>
+                    <field name="invoice_id" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <widget name="web_ribbon" title="Reincidencia" bg_color="text-bg-warning"
+                            invisible="recurrent_flag == 0"/>
+
+                    <div class="oe_button_box" name="button_box">
+                        <button name="%(action_report_service_order)d" type="action"
+                                class="oe_stat_button" icon="fa-print">
+                            <div class="o_stat_info"><span class="o_stat_text">Imprimir</span></div>
+                        </button>
+                        <button name="%(action_report_label)d" type="action"
+                                class="oe_stat_button" icon="fa-tag">
+                            <div class="o_stat_info"><span class="o_stat_text">Etiqueta</span></div>
+                        </button>
+                        <button name="action_whatsapp" type="object" class="oe_stat_button"
+                                icon="fa-whatsapp" invisible="not partner_id">
+                            <div class="o_stat_info"><span class="o_stat_text">Avisar</span></div>
+                        </button>
+                        <button name="action_whatsapp_link" type="object" class="oe_stat_button"
+                                icon="fa-link" invisible="not partner_id">
+                            <div class="o_stat_info"><span class="o_stat_text">Seguimiento</span></div>
+                        </button>
+                        <button name="action_view_reentries" type="object" class="oe_stat_button"
+                                icon="fa-repeat" invisible="reentry_count == 0">
+                            <field name="reentry_count" widget="statinfo" string="Reingresos"/>
+                        </button>
+                        <button name="action_view_device_history" type="object" class="oe_stat_button"
+                                icon="fa-history" invisible="history_count == 0">
+                            <field name="history_count" widget="statinfo" string="Historial del equipo"/>
+                        </button>
+                        <button name="action_view_invoice" type="object" class="oe_stat_button"
+                                icon="fa-file-text-o" groups="taller.group_taller_manager"
+                                invisible="not invoice_id">
+                            <div class="o_stat_info"><span class="o_stat_text">Factura</span></div>
+                        </button>
+                    </div>
+
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+
+                    <group>
+                        <group string="Cliente">
+                            <field name="partner_id" required="1"/>
+                            <field name="customer_phone"/>
+                            <field name="notify_customer" invisible="not partner_id"/>
+                            <field name="customer_name" invisible="partner_id or not id"/>
+                        </group>
+                        <group string="Equipo">
+                            <field name="device_type"/>
+                            <field name="device_brand"/>
+                            <field name="device_model"/>
+                            <field name="serial_number"/>
+                            <field name="accessories"/>
+                        </group>
+                    </group>
+                    <group>
+                        <group string="Plazos">
+                            <field name="user_id"/>
+                            <field name="date_received"/>
+                            <field name="promise_date"/>
+                            <field name="date_ready"/>
+                            <field name="date_finished"/>
+                        </group>
+                        <group string="Cobro y garantía">
+                            <field name="total"/>
+                            <field name="paid_total"/>
+                            <field name="balance"/>
+                            <field name="warranty_days"/>
+                            <field name="warranty_end"/>
+                            <field name="warranty_status" widget="badge"
+                                   decoration-success="warranty_status == 'active'"
+                                   decoration-danger="warranty_status == 'expired'"
+                                   invisible="warranty_status == 'none'"/>
+                            <field name="no_charge" invisible="not no_charge"/>
+                            <field name="warranty_of_id" invisible="not warranty_of_id"/>
+                        </group>
+                    </group>
+
+                    <notebook>
+                        <page string="Problema" name="problem">
+                            <group>
+                                <group string="Problema reportado">
+                                    <field name="issue_description" nolabel="1"
+                                           placeholder="Describe el problema del equipo..."/>
+                                </group>
+                                <group string="Estado físico al ingreso">
+                                    <field name="physical_condition" nolabel="1"
+                                           placeholder="Rayones, golpes, pantalla rota, etc."/>
+                                </group>
+                            </group>
+                        </page>
+                        <page string="Repuestos y costos" name="costs">
+                            <separator string="Servicios del catálogo"/>
+                            <field name="service_ids" widget="many2many_tags" options="{'no_create': True}"/>
+                            <separator string="Repuestos"/>
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="part_id"/>
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="unit_price"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                    <field name="subtotal"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="parts_total"/>
+                                <field name="labor_cost"/>
+                                <field name="total" class="oe_subtotal_footer_separator"/>
+                            </group>
+                            <group class="oe_right" groups="taller.group_taller_manager">
+                                <field name="parts_cost"/>
+                                <field name="margin"/>
+                            </group>
+                        </page>
+                        <page string="Pagos" name="payments">
+                            <field name="payment_ids">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="amount"/>
+                                    <field name="method"/>
+                                    <field name="note"/>
+                                    <field name="currency_id" column_invisible="1"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="total" readonly="1"/>
+                                <field name="paid_total"/>
+                                <field name="balance" class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+                        <page string="Checklist" name="checklist">
+                            <button name="action_load_checklist" string="Cargar puntos faltantes"
+                                    type="object" class="btn-secondary"/>
+                            <field name="check_ids">
+                                <list editable="bottom">
+                                    <field name="sequence" widget="handle"/>
+                                    <field name="name"/>
+                                    <field name="result"/>
+                                    <field name="note"/>
+                                </list>
+                            </field>
+                        </page>
+                        <page string="Fotos y firma" name="photos">
+                            <field name="photo_ids" mode="kanban">
+                                <kanban>
+                                    <field name="image"/>
+                                    <templates>
+                                        <t t-name="card">
+                                            <div class="oe_kanban_global_click">
+                                                <field name="image" widget="image" options="{'size': [150, 150]}"/>
+                                                <div><field name="name"/> · <field name="stage"/></div>
+                                            </div>
+                                        </t>
+                                    </templates>
+                                </kanban>
+                            </field>
+                            <group string="Entrega del equipo">
+                                <field name="delivery_signed_by"/>
+                                <field name="delivery_signature" widget="signature"
+                                       options="{'full_name': 'delivery_signed_by'}"/>
+                            </group>
+                        </page>
+                        <page string="Seguimiento y valoración" name="tracking">
+                            <group>
+                                <group string="Enlace para el cliente">
+                                    <field name="public_url" widget="url" invisible="not public_url"/>
+                                </group>
+                                <group string="Valoración del cliente">
+                                    <field name="rating"/>
+                                    <field name="rating_comment"/>
+                                    <field name="rating_date"/>
+                                </group>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- ============ Tarjetas del kanban (más ricas) ============ -->
+    <record id="view_service_order_kanban_rich" model="ir.ui.view">
+        <field name="name">service.order.kanban.rich</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_kanban"/>
+        <field name="priority">98</field>
+        <field name="arch" type="xml">
+            <xpath expr="//templates" position="before">
+                <field name="status"/>
+                <field name="device_type"/>
+                <field name="customer_name"/>
+                <field name="promise_date"/>
+                <field name="no_charge"/>
+                <field name="balance"/>
+                <field name="is_late"/>
+                <field name="recurrent_flag"/>
+            </xpath>
+            <xpath expr="//div[hasclass('oe_kanban_global_click')]" position="replace">
+                <div t-attf-class="oe_kanban_global_click o_taller_card o_taller_card_#{record.status.raw_value}">
+                    <div class="o_taller_card_head">
+                        <span class="o_taller_card_name"><field name="name"/></span>
+                        <span class="o_taller_card_badges">
+                            <span t-if="record.is_late.raw_value" class="badge text-bg-danger">Atrasada</span>
+                            <span t-if="record.recurrent_flag.raw_value" class="badge text-bg-warning">Reincidencia</span>
+                            <span t-if="record.no_charge.raw_value" class="badge text-bg-info">Sin cargo</span>
+                        </span>
+                    </div>
+                    <div class="o_taller_card_customer">
+                        <span class="o_taller_avatar"><t t-out="(record.customer_name.value || '?').charAt(0).toUpperCase()"/></span>
+                        <field name="customer_name"/>
+                    </div>
+                    <div class="o_taller_card_device">
+                        <i t-attf-class="fa #{record.device_type.raw_value == 'phone' ? 'fa-mobile' : (record.device_type.raw_value == 'tablet' ? 'fa-tablet' : 'fa-laptop')}"/>
+                        <field name="device_brand"/> <field name="device_model"/>
+                    </div>
+                    <div class="o_taller_card_dates">
+                        <span title="Ingreso"><i class="fa fa-sign-in"/> <field name="date_received" widget="remaining_days"/></span>
+                        <span t-if="record.promise_date.raw_value" title="Fecha prometida"
+                              t-attf-class="#{record.is_late.raw_value ? 'text-danger fw-bold' : ''}">
+                            <i class="fa fa-calendar"/> <field name="promise_date" widget="remaining_days"/>
+                        </span>
+                    </div>
+                    <div class="o_taller_card_foot">
+                        <span class="o_taller_card_total"><field name="total" widget="monetary"/></span>
+                        <span t-if="record.balance.raw_value > 0" class="badge text-bg-warning">
+                            Saldo <field name="balance" widget="monetary"/>
+                        </span>
+                        <field name="user_id" widget="many2one_avatar_user"/>
+                    </div>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

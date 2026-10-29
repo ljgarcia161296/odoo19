@@ -1,0 +1,136 @@
+<odoo>
+    <record id="view_service_part_tree" model="ir.ui.view">
+        <field name="name">service.part.tree</field>
+        <field name="model">service.part</field>
+        <field name="arch" type="xml">
+            <list string="Repuestos" decoration-danger="low_stock">
+                <field name="code"/>
+                <field name="name"/>
+                <field name="stock"/>
+                <field name="min_stock"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="cost"/>
+                <field name="price"/>
+                <field name="low_stock" invisible="1"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_service_part_form" model="ir.ui.view">
+        <field name="name">service.part.form</field>
+        <field name="model">service.part</field>
+        <field name="arch" type="xml">
+            <form string="Repuesto">
+                <sheet>
+                    <widget name="web_ribbon" title="Stock bajo" bg_color="text-bg-danger"
+                            invisible="not low_stock"/>
+                    <field name="low_stock" invisible="1"/>
+                    <field name="currency_id" invisible="1"/>
+                    <field name="active" invisible="1"/>
+                    <div class="oe_title">
+                        <h1><field name="name" placeholder="Nombre del repuesto"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="code"/>
+                            <field name="cost"/>
+                            <field name="price"/>
+                        </group>
+                        <group>
+                            <field name="stock"/>
+                            <field name="min_stock"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Movimientos">
+                            <field name="move_ids">
+                                <list editable="bottom">
+                                    <field name="date"/>
+                                    <field name="move_type"/>
+                                    <field name="quantity"/>
+                                    <field name="order_id" readonly="1"/>
+                                    <field name="note"/>
+                                </list>
+                            </field>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_service_part_search" model="ir.ui.view">
+        <field name="name">service.part.search</field>
+        <field name="model">service.part</field>
+        <field name="arch" type="xml">
+            <search string="Repuestos">
+                <field name="name" string="Repuesto"/>
+                <field name="code"/>
+                <filter name="f_low" string="Stock bajo" domain="[('low_stock', '=', True)]"/>
+                <filter name="f_zero" string="Sin stock" domain="[('stock', '&lt;=', 0)]"/>
+                <filter name="f_archived" string="Archivados" domain="[('active', '=', False)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_service_part_move_tree" model="ir.ui.view">
+        <field name="name">service.part.move.tree</field>
+        <field name="model">service.part.move</field>
+        <field name="arch" type="xml">
+            <list string="Movimientos de stock" create="false">
+                <field name="date"/>
+                <field name="part_id"/>
+                <field name="move_type"/>
+                <field name="signed_qty" string="Variación"/>
+                <field name="order_id"/>
+                <field name="note"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_service_part_move_search" model="ir.ui.view">
+        <field name="name">service.part.move.search</field>
+        <field name="model">service.part.move</field>
+        <field name="arch" type="xml">
+            <search string="Movimientos">
+                <field name="part_id"/>
+                <field name="order_id"/>
+                <filter name="f_in" string="Entradas" domain="[('move_type', '=', 'in')]"/>
+                <filter name="f_out" string="Salidas" domain="[('move_type', '=', 'out')]"/>
+                <group>
+                    <filter name="g_part" string="Repuesto" context="{'group_by': 'part_id'}"/>
+                    <filter name="g_type" string="Tipo" context="{'group_by': 'move_type'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="view_service_order_form_parts" model="ir.ui.view">
+        <field name="name">service.order.form.parts</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='line_ids']/list/field[@name='name']" position="before">
+                <field name="part_id"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="action_service_part" model="ir.actions.act_window">
+        <field name="name">Repuestos</field>
+        <field name="res_model">service.part</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_service_part_move" model="ir.actions.act_window">
+        <field name="name">Movimientos de stock</field>
+        <field name="res_model">service.part.move</field>
+        <field name="view_mode">list</field>
+    </record>
+
+    <menuitem id="menu_taller_inventory" name="Inventario" parent="menu_taller_root" sequence="25"/>
+    <menuitem id="menu_taller_parts" name="Repuestos" parent="menu_taller_inventory"
+              action="action_service_part" sequence="10"/>
+    <menuitem id="menu_taller_moves" name="Movimientos" parent="menu_taller_inventory"
+              action="action_service_part_move" sequence="20"/>
+</odoo>

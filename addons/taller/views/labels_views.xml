@@ -1,0 +1,48 @@
+<odoo>
+    <record id="view_service_order_photo_form" model="ir.ui.view">
+        <field name="name">service.order.photo.form</field>
+        <field name="model">service.order.photo</field>
+        <field name="arch" type="xml">
+            <form string="Foto">
+                <group>
+                    <field name="name"/>
+                    <field name="stage"/>
+                    <field name="image" widget="image" options="{'size': [300, 300]}"/>
+                </group>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_service_order_form_labels" model="ir.ui.view">
+        <field name="name">service.order.form.labels</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='status']" position="before">
+                <button name="%(action_report_label)d" string="Etiqueta" type="action" icon="fa-tag"/>
+            </xpath>
+            <xpath expr="//notebook" position="inside">
+                <page string="Fotos y firma">
+                    <field name="photo_ids" mode="kanban">
+                        <kanban>
+                            <field name="image"/>
+                            <templates>
+                                <t t-name="card">
+                                    <div class="oe_kanban_global_click">
+                                        <field name="image" widget="image" options="{'size': [150, 150]}"/>
+                                        <div><field name="name"/> · <field name="stage"/></div>
+                                    </div>
+                                </t>
+                            </templates>
+                        </kanban>
+                    </field>
+                    <group string="Entrega del equipo">
+                        <field name="delivery_signed_by"/>
+                        <field name="delivery_signature" widget="signature"
+                               options="{'full_name': 'delivery_signed_by'}"/>
+                    </group>
+                </page>
+            </xpath>
+        </field>
+    </record>
+</odoo>

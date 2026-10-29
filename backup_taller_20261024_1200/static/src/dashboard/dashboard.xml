@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Dashboard">
+        <div class="o_taller_dashboard">
+            <div class="td-hero">
+                <span class="td-blob td-blob-1"/>
+                <span class="td-blob td-blob-2"/>
+                <span class="td-blob td-blob-3"/>
+                <div class="td-hero-text">
+                    <div class="td-hello"><t t-out="greeting"/>, <t t-out="state.data.user"/></div>
+                    <div class="td-sub">Resumen de tu taller · <t t-out="state.data.today"/></div>
+                </div>
+                <div class="td-actions">
+                    <button class="td-btn td-btn-primary" t-on-click="() => this.newOrder()">
+                        <i class="fa fa-plus"/> Nueva orden
+                    </button>
+                    <button class="td-btn" t-on-click="() => this.goTo('taller.action_service_order')">
+                        <i class="fa fa-columns"/> Órdenes
+                    </button>
+                    <button class="td-btn" t-on-click="() => this.goTo('taller.action_taller_clientes')">
+                        <i class="fa fa-users"/> Clientes
+                    </button>
+                    <t t-if="state.data.is_manager">
+                        <button class="td-btn" t-on-click="() => this.goTo('taller.action_to_invoice')">
+                            <i class="fa fa-file-text-o"/> Por facturar
+                        </button>
+                        <button class="td-btn" t-on-click="() => this.goTo('taller.action_suggest_purchase')">
+                            <i class="fa fa-shopping-cart"/> Compra sugerida
+                        </button>
+                    </t>
+                    <button class="td-btn td-btn-icon" title="Actualizar" t-on-click="() => this.refresh()">
+                        <i class="fa fa-refresh"/>
+                    </button>
+                </div>
+            </div>
+
+            <div class="td-grid">
+                <div t-foreach="state.data.kpis" t-as="kpi" t-key="kpi.key"
+                     t-attf-class="td-card td-tone-#{kpi.tone} #{kpi.alert ? 'td-alert' : ''}"
+                     t-attf-style="animation-delay: #{kpi_index * 70}ms"
+                     t-on-click="() => this.openKpi(kpi)">
+                    <div class="td-card-icon"><i t-attf-class="fa #{kpi.icon}"/></div>
+                    <div class="td-card-value"><t t-out="format(kpi, kpi_index)"/></div>
+                    <div class="td-card-label"><t t-out="kpi.label"/></div>
+                </div>
+            </div>
+
+            <div class="td-columns">
+                <div class="td-panel">
+                    <div class="td-panel-title">Órdenes por estado</div>
+                    <div t-foreach="state.data.stages" t-as="stage" t-key="stage.key"
+                         t-attf-class="td-stage td-stage-#{stage.key}"
+                         t-on-click="() => this.openStage(stage)">
+                        <div class="td-stage-name"><t t-out="stage.label"/></div>
+                        <div class="td-bar">
+                            <div class="td-bar-fill"
+                                 t-attf-style="width: #{state.barsReady ? stage.pct : 0}%"/>
+                        </div>
+                        <div class="td-stage-count"><t t-out="stage.count"/></div>
+                    </div>
+                </div>
+
+                <div class="td-panel">
+                    <div class="td-panel-title">Últimas órdenes</div>
+                    <div t-if="!state.data.recent.length" class="td-empty">Todavía no hay órdenes.</div>
+                    <div t-foreach="state.data.recent" t-as="order" t-key="order.id"
+                         class="td-recent" t-on-click="() => this.openOrder(order.id)">
+                        <div class="td-recent-main">
+                            <div class="td-recent-name"><t t-out="order.name"/> · <t t-out="order.customer"/></div>
+                            <div class="td-recent-sub"><t t-out="order.device"/> · <t t-out="order.date"/></div>
+                        </div>
+                        <span t-attf-class="td-pill td-pill-#{order.status}"><t t-out="order.status_label"/></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,39 @@
+<odoo noupdate="1">
+    <record id="seq_service_purchase" model="ir.sequence">
+        <field name="name">Compra de repuestos</field>
+        <field name="code">service.purchase</field>
+        <field name="prefix">OC/</field>
+        <field name="padding">5</field>
+        <field name="number_next">1</field>
+        <field name="company_id" eval="False"/>
+    </record>
+
+    <record id="cron_low_stock_activities" model="ir.cron">
+        <field name="name">Taller: alertas de stock bajo</field>
+        <field name="model_id" ref="model_service_part"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_low_stock_activities()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+
+    <record id="mail_template_order_ready" model="mail.template">
+        <field name="name">Taller: equipo listo para retirar</field>
+        <field name="model_id" ref="model_service_order"/>
+        <field name="subject">Su equipo está listo - {{ object.name }}</field>
+        <field name="email_to">{{ object.partner_id.email }}</field>
+        <field name="auto_delete" eval="True"/>
+        <field name="body_html" type="html">
+<div style="margin: 0; padding: 0; font-size: 14px;">
+    <p>Hola <t t-out="object.partner_id.name or object.customer_name or ''"/>,</p>
+    <p>Le informamos que su equipo
+        (<t t-out="object.device_brand or ''"/> <t t-out="object.device_model or ''"/>)
+        correspondiente a la orden <strong t-out="object.name"/>
+        ya está <strong>listo para retirar</strong>.</p>
+    <p>Total a abonar: <t t-out="object.currency_id.symbol or ''"/> <t t-out="'%.2f' % object.total"/></p>
+    <p>Gracias por confiar en nosotros.<br/>
+        <t t-out="user.company_id.name or ''"/></p>
+</div>
+        </field>
+    </record>
+</odoo>

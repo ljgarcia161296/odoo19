@@ -1,0 +1,79 @@
+<odoo>
+    <record id="action_report_service_order" model="ir.actions.report">
+        <field name="name">Orden de Servicio</field>
+        <field name="model">service.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">taller.report_service_order</field>
+        <field name="report_file">taller.report_service_order</field>
+        <field name="print_report_name">'Orden-%s' % (object.name.replace('/', '-'))</field>
+        <field name="binding_model_id" ref="model_service_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_service_order">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Orden de Servicio <span t-field="o.name"/></h2>
+                        <div class="row mt-3 mb-3">
+                            <div class="col-6">
+                                <strong>Cliente:</strong> <span t-field="o.customer_name"/><br/>
+                                <t t-if="o.customer_phone">
+                                    <strong>Contacto:</strong> <span t-out="o.customer_phone"/><br/>
+                                </t>
+                                <strong>Equipo:</strong> <span t-field="o.device_type"/><br/>
+                                <strong>Marca / Modelo:</strong> <span t-field="o.device_brand"/> <span t-field="o.device_model"/><br/>
+                                <strong>Serie / IMEI:</strong> <span t-field="o.serial_number"/><br/>
+                                <strong>Técnico:</strong> <span t-field="o.user_id"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Estado:</strong> <span t-field="o.status"/><br/>
+                                <strong>Ingreso:</strong> <span t-field="o.date_received"/><br/>
+                                <strong>Entrega:</strong> <span t-field="o.date_finished"/>
+                            </div>
+                        </div>
+                        <h5>Problema reportado</h5>
+                        <p><span t-field="o.issue_description"/></p>
+                        <t t-if="o.accessories">
+                            <h5>Accesorios recibidos</h5>
+                            <p><span t-field="o.accessories"/></p>
+                        </t>
+                        <t t-if="o.physical_condition">
+                            <h5>Estado físico al ingreso</h5>
+                            <p><span t-field="o.physical_condition"/></p>
+                        </t>
+                        <h5>Repuestos</h5>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Repuesto</th>
+                                    <th class="text-end">Cant.</th>
+                                    <th class="text-end">Precio</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.line_ids" t-as="l">
+                                    <td><span t-field="l.name"/></td>
+                                    <td class="text-end"><span t-field="l.quantity"/></td>
+                                    <td class="text-end"><span t-field="l.unit_price"/></td>
+                                    <td class="text-end"><span t-field="l.subtotal"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="row">
+                            <div class="col-6 offset-6">
+                                <table class="table table-sm">
+                                    <tr><td>Repuestos</td><td class="text-end"><span t-field="o.parts_total"/></td></tr>
+                                    <tr><td>Mano de obra</td><td class="text-end"><span t-field="o.labor_cost"/></td></tr>
+                                    <tr><td><strong>Total</strong></td><td class="text-end"><strong><span t-field="o.total"/></strong></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

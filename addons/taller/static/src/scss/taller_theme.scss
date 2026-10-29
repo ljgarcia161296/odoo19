@@ -1,0 +1,119 @@
+// Tema de marca para el backend (solo CSS, no toca las variables internas de Odoo)
+:root {
+    --taller-primary: #0f4c5c;
+    --taller-primary-2: #17798f;
+    --taller-accent: #e8a33d;
+    --bs-primary: #0f4c5c;
+    --bs-primary-rgb: 15, 76, 92;
+}
+
+.o_main_navbar {
+    background: linear-gradient(90deg, #0f4c5c 0%, #17798f 100%) !important;
+    border-bottom: 3px solid #e8a33d;
+}
+.o_main_navbar .o_menu_sections .o_nav_entry:hover,
+.o_main_navbar .o_menu_sections .dropdown-toggle:hover,
+.o_main_navbar .o_navbar_apps_menu .dropdown-toggle:hover,
+.o_main_navbar .o_menu_systray > div:hover {
+    background-color: rgba(255, 255, 255, 0.14) !important;
+}
+
+.btn-primary {
+    --bs-btn-bg: #0f4c5c;
+    --bs-btn-border-color: #0f4c5c;
+    --bs-btn-hover-bg: #17798f;
+    --bs-btn-hover-border-color: #17798f;
+    --bs-btn-active-bg: #0c3d4a;
+    --bs-btn-active-border-color: #0c3d4a;
+    background-color: #0f4c5c !important;
+    border-color: #0f4c5c !important;
+}
+.btn-primary:hover, .btn-primary:focus {
+    background-color: #17798f !important;
+    border-color: #17798f !important;
+}
+
+// ---- Formulario de la orden
+.o_taller_form {
+    .o_horizontal_separator {
+        color: #0f4c5c;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        font-size: 0.75rem;
+        font-weight: 700;
+    }
+    .oe_title h1 { font-weight: 800; color: #0f4c5c; }
+}
+
+// ---- Tarjetas del kanban
+.o_taller_card {
+    border-left: 4px solid #9aa7ad;
+    border-radius: 10px;
+    padding: 10px 12px;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+    &:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(20, 40, 50, 0.15); }
+    .o_taller_card_head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+    .o_taller_card_name { font-weight: 800; color: #0f4c5c; }
+    .o_taller_card_badges { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
+    .o_taller_card_customer { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-weight: 600; }
+    .o_taller_avatar {
+        width: 24px; height: 24px; border-radius: 50%;
+        display: inline-flex; align-items: center; justify-content: center;
+        background: #0f4c5c; color: #fff; font-size: 12px; font-weight: 700;
+    }
+    .o_taller_card_device { color: #6b7a82; margin-top: 4px; font-size: 0.9em; }
+    .o_taller_card_dates { display: flex; gap: 12px; color: #6b7a82; margin-top: 6px; font-size: 0.85em; }
+    .o_taller_card_foot { display: flex; justify-content: space-between; align-items: center; gap: 6px; margin-top: 8px; }
+    .o_taller_card_total { font-weight: 800; }
+}
+.o_taller_card_draft { border-left-color: #9aa7ad; }
+.o_taller_card_diagnosing { border-left-color: #3b7dd8; }
+.o_taller_card_quote { border-left-color: #e8a33d; }
+.o_taller_card_repairing { border-left-color: #7a5af8; }
+.o_taller_card_done { border-left-color: #2e8b57; }
+.o_taller_card_delivered { border-left-color: #5fbf8a; }
+.o_taller_card_cancel { border-left-color: #d64545; }
+
+/* menu-transparente: las entradas del menú toman el color de la barra */
+.o_main_navbar .o_navbar_apps_menu,
+.o_main_navbar .o_navbar_apps_menu .dropdown-toggle,
+.o_main_navbar .o_menu_brand,
+.o_main_navbar .o_menu_sections,
+.o_main_navbar .o_menu_sections > *,
+.o_main_navbar .o_menu_sections .o_nav_entry,
+.o_main_navbar .o_menu_sections .dropdown-toggle,
+.o_main_navbar .o_menu_systray,
+.o_main_navbar .o_menu_systray > * {
+    background-color: transparent !important;
+    background-image: none !important;
+    box-shadow: none !important;
+    border-color: transparent !important;
+    color: #ffffff !important;
+}
+.o_main_navbar .o_menu_sections .o_nav_entry:hover,
+.o_main_navbar .o_menu_sections .dropdown-toggle:hover,
+.o_main_navbar .o_navbar_apps_menu .dropdown-toggle:hover,
+.o_main_navbar .o_menu_systray > *:hover {
+    background-color: rgba(255, 255, 255, 0.16) !important;
+}
+.o_main_navbar .o_menu_sections .show > .dropdown-toggle,
+.o_main_navbar .o_menu_sections .o_nav_entry.focus {
+    background-color: rgba(255, 255, 255, 0.22) !important;
+}
+
+/* barra de resumen fija en la orden */
+.o_taller_form .o_taller_summarybar {
+    position: sticky;
+    top: 0;
+    z-index: 5;
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px 18px;
+    padding: 8px 18px;
+    background: #ffffff;
+    border-bottom: 1px solid #e3e9ec;
+    box-shadow: 0 2px 6px rgba(20, 40, 50, 0.06);
+}
+.o_taller_form .o_taller_sb_name { font-weight: 800; color: #0f4c5c; font-size: 1.1em; }
+.o_taller_form .o_taller_sb_money { margin-left: auto; display: inline-flex; gap: 14px; font-weight: 700; }

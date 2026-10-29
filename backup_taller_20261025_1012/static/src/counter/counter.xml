@@ -1,0 +1,174 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Counter">
+        <div class="o_taller_counter">
+            <div class="tc-wrap">
+
+                <!-- ===== Orden creada ===== -->
+                <div t-if="state.done" class="tc-card tc-done">
+                    <div class="tc-done-icon"><i class="fa fa-check"/></div>
+                    <h2>Orden <t t-out="state.done.name"/> creada</h2>
+                    <p class="tc-muted">El equipo quedó registrado. Imprime la etiqueta para pegarla en el equipo.</p>
+                    <div class="tc-actions">
+                        <button class="tc-btn tc-btn-primary" t-on-click="printLabel"><i class="fa fa-tag"/> Imprimir etiqueta</button>
+                        <button class="tc-btn" t-on-click="printOrder"><i class="fa fa-print"/> Imprimir orden</button>
+                        <button class="tc-btn" t-on-click="openOrder"><i class="fa fa-folder-open"/> Abrir orden</button>
+                        <button class="tc-btn" t-on-click="reset"><i class="fa fa-plus"/> Nueva recepción</button>
+                    </div>
+                </div>
+
+                <t t-else="">
+                    <div class="tc-title">Recepción de equipos</div>
+                    <div class="tc-steps">
+                        <div t-foreach="steps" t-as="s" t-key="s_index" t-att-class="stepClass(s_index)">
+                            <span class="tc-step-num"><t t-out="s_index + 1"/></span>
+                            <span class="tc-step-name"><t t-out="s"/></span>
+                        </div>
+                    </div>
+
+                    <!-- ===== Paso 1: cliente ===== -->
+                    <div t-if="state.step === 1" class="tc-card">
+                        <h2>¿Quién trae el equipo?</h2>
+                        <div t-if="state.partner" class="tc-selected">
+                            <div>
+                                <div class="tc-selected-name"><i class="fa fa-user"/> <t t-out="state.partner.name"/></div>
+                                <div class="tc-muted"><t t-out="state.partner.phone or 'Sin teléfono'"/></div>
+                            </div>
+                            <button class="tc-btn tc-btn-small" t-on-click="clearPartner">Cambiar</button>
+                        </div>
+                        <t t-else="">
+                            <input class="tc-input" type="text" autofocus="autofocus"
+                                   placeholder="Buscar por nombre, teléfono o IMEI / serie"
+                                   t-att-value="state.query" t-on-input="onQuery"/>
+                            <div t-if="state.partners.length" class="tc-list">
+                                <div class="tc-list-title">Clientes</div>
+                                <div t-foreach="state.partners" t-as="p" t-key="p.id" class="tc-row"
+                                     t-on-click="() => this.selectPartner(p)">
+                                    <b><t t-out="p.name"/></b>
+                                    <span class="tc-muted"><t t-out="p.phone"/></span>
+                                </div>
+                            </div>
+                            <div t-if="state.devices.length" class="tc-list">
+                                <div class="tc-list-title">Equipos ya registrados</div>
+                                <div t-foreach="state.devices" t-as="d" t-key="d.serial" class="tc-row"
+                                     t-on-click="() => this.selectDevice(d)">
+                                    <b><t t-out="d.brand"/> <t t-out="d.model"/> · <t t-out="d.serial"/></b>
+                                    <span class="tc-muted"><t t-out="d.partner_name"/></span>
+                                </div>
+                            </div>
+                            <button class="tc-btn tc-btn-link" t-on-click="toggleNew">
+                                <i class="fa fa-user-plus"/> Crear cliente nuevo
+                            </button>
+                            <div t-if="state.showNew" class="tc-new">
+                                <input class="tc-input" type="text" placeholder="Nombre del cliente" t-model="state.newCustomer.name"/>
+                                <input class="tc-input" type="tel" placeholder="Teléfono (con el que se le avisa)" t-model="state.newCustomer.phone"/>
+                                <button class="tc-btn tc-btn-primary" t-on-click="createCustomer">Guardar cliente</button>
+                            </div>
+                        </t>
+                    </div>
+
+                    <!-- ===== Paso 2: equipo y problema ===== -->
+                    <div t-if="state.step === 2" class="tc-card">
+                        <h2>Equipo y problema</h2>
+                        <div class="tc-types">
+                            <button t-foreach="deviceTypes" t-as="t" t-key="t.key"
+                                    t-attf-class="tc-type #{state.form.device_type === t.key ? 'active' : ''}"
+                                    t-on-click="() => this.setType(t.key)">
+                                <i t-attf-class="fa #{t.icon}"/>
+                                <span><t t-out="t.label"/></span>
+                            </button>
+                        </div>
+                        <div class="tc-grid">
+                            <input class="tc-input" type="text" placeholder="Marca" t-model="state.form.brand"/>
+                            <input class="tc-input" type="text" placeholder="Modelo" t-model="state.form.model"/>
+                            <input class="tc-input" type="text" placeholder="N.º de serie / IMEI"
+                                   t-model="state.form.serial" t-on-change="loadHistory"/>
+                            <input class="tc-input" type="text" placeholder="Accesorios recibidos (cargador, funda...)"
+                                   t-model="state.form.accessories"/>
+                        </div>
+                        <div t-if="state.history and state.history.count" class="tc-alert">
+                            <b>Este equipo ya pasó <t t-out="state.history.count"/> vez/veces por el taller.</b>
+                            <div t-foreach="state.history.orders" t-as="h" t-key="h.name">
+                                <t t-out="h.name"/> · <t t-out="h.date"/> · <t t-out="h.status"/>
+                            </div>
+                        </div>
+                        <textarea class="tc-input" rows="3" placeholder="¿Qué problema tiene el equipo? (obligatorio)"
+                                  t-model="state.form.problem"/>
+                        <textarea class="tc-input" rows="2" placeholder="Estado físico al ingreso (rayones, golpes, pantalla rota...)"
+                                  t-model="state.form.condition"/>
+                        <div class="tc-grid">
+                            <label class="tc-label">Fecha prometida
+                                <input class="tc-input" type="date" t-model="state.form.promise_date"/>
+                            </label>
+                            <label t-if="state.isManager" class="tc-label">Técnico
+                                <select class="tc-input" t-model="state.form.user_id">
+                                    <option t-foreach="state.users" t-as="u" t-key="u.id" t-att-value="u.id">
+                                        <t t-out="u.name"/>
+                                    </option>
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- ===== Paso 3: checklist y fotos ===== -->
+                    <div t-if="state.step === 3" class="tc-card">
+                        <h2>Checklist de ingreso</h2>
+                        <p class="tc-muted">Toca cada punto para cambiar su estado.</p>
+                        <div class="tc-checks">
+                            <div t-foreach="state.checks" t-as="c" t-key="c.item_id" class="tc-check"
+                                 t-on-click="() => this.cycle(c)">
+                                <span><t t-out="c.name"/></span>
+                                <span t-attf-class="tc-pill tc-pill-#{c.result}"><t t-out="resultLabel[c.result]"/></span>
+                            </div>
+                            <div t-if="!state.checks.length" class="tc-muted">No hay puntos de checklist para este tipo de equipo.</div>
+                        </div>
+                        <h2 class="tc-h2-space">Fotos del equipo</h2>
+                        <div class="tc-actions">
+                            <button class="tc-btn tc-btn-primary" t-on-click="pickCamera"><i class="fa fa-camera"/> Tomar foto</button>
+                            <button class="tc-btn" t-on-click="pickGallery"><i class="fa fa-picture-o"/> Elegir de la galería</button>
+                        </div>
+                        <input type="file" t-ref="cameraInput" class="d-none" accept="image/*" capture="environment" t-on-change="onPhotos"/>
+                        <input type="file" t-ref="galleryInput" class="d-none" accept="image/*" multiple="multiple" t-on-change="onPhotos"/>
+                        <div class="tc-photos">
+                            <div t-foreach="state.photos" t-as="ph" t-key="ph_index" class="tc-photo">
+                                <img t-att-src="ph.data" alt="Foto"/>
+                                <button class="tc-photo-x" t-on-click="() => this.removePhoto(ph_index)">×</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ===== Paso 4: firma y confirmar ===== -->
+                    <div t-if="state.step === 4" class="tc-card">
+                        <h2>Firma y confirmación</h2>
+                        <t t-set="sum" t-value="summary"/>
+                        <div class="tc-summary">
+                            <div><span class="tc-muted">Cliente</span><b><t t-out="state.partner.name"/></b></div>
+                            <div><span class="tc-muted">Equipo</span><b><t t-out="sum.type"/> · <t t-out="sum.device"/></b></div>
+                            <div><span class="tc-muted">Checklist</span><b><t t-out="sum.tested"/> probados · <t t-out="sum.failed"/> con falla</b></div>
+                            <div><span class="tc-muted">Fotos</span><b><t t-out="state.photos.length"/></b></div>
+                        </div>
+                        <div class="tc-label">Conformidad del cliente (firma con el dedo o el mouse)</div>
+                        <canvas t-ref="sigCanvas" class="tc-sig"
+                                t-on-pointerdown="sigDown" t-on-pointermove="sigMove"
+                                t-on-pointerup="sigUp" t-on-pointerleave="sigUp"/>
+                        <div class="tc-actions">
+                            <button class="tc-btn tc-btn-small" t-on-click="clearSignature">Borrar firma</button>
+                        </div>
+                    </div>
+
+                    <!-- ===== Navegación ===== -->
+                    <div class="tc-nav">
+                        <button class="tc-btn" t-if="state.step > 1" t-on-click="back">← Atrás</button>
+                        <span class="tc-spacer"/>
+                        <button class="tc-btn tc-btn-primary" t-if="state.step &lt; 4"
+                                t-att-disabled="!canNext" t-on-click="next">Siguiente →</button>
+                        <button class="tc-btn tc-btn-primary" t-if="state.step === 4"
+                                t-att-disabled="state.saving" t-on-click="submit">
+                            <t t-if="state.saving">Guardando...</t><t t-else="">Crear orden</t>
+                        </button>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,71 @@
+<odoo>
+    <!-- Quita el panel de mensajes (chatter) de los formularios. El historial se sigue guardando. -->
+    <record id="view_service_order_form_nochatter" model="ir.ui.view">
+        <field name="name">service.order.form.nochatter</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_form"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <xpath expr="//chatter" position="replace"/>
+        </field>
+    </record>
+
+    <record id="view_service_part_form_nochatter" model="ir.ui.view">
+        <field name="name">service.part.form.nochatter</field>
+        <field name="model">service.part</field>
+        <field name="inherit_id" ref="view_service_part_form"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <xpath expr="//chatter" position="replace"/>
+        </field>
+    </record>
+
+    <record id="view_service_purchase_form_nochatter" model="ir.ui.view">
+        <field name="name">service.purchase.form.nochatter</field>
+        <field name="model">service.purchase</field>
+        <field name="inherit_id" ref="view_service_purchase_form"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <xpath expr="//chatter" position="replace"/>
+        </field>
+    </record>
+
+    <record id="view_partner_form_nochatter" model="ir.ui.view">
+        <field name="name">res.partner.form.nochatter</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <xpath expr="//chatter" position="replace"/>
+        </field>
+    </record>
+
+    <record id="view_move_form_nochatter" model="ir.ui.view">
+        <field name="name">account.move.form.nochatter</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <xpath expr="//chatter" position="replace"/>
+        </field>
+    </record>
+
+    <!-- Sin el chatter, las actividades (recordatorios) se completan desde este menú -->
+    <record id="action_taller_activities" model="ir.actions.act_window">
+        <field name="name">Mis actividades</field>
+        <field name="res_model">mail.activity</field>
+        <field name="view_mode">list,form</field>
+        <field name="domain">[('user_id', '=', uid)]</field>
+    </record>
+
+    <record id="action_activity_mark_done" model="ir.actions.server">
+        <field name="name">Marcar como hecha</field>
+        <field name="model_id" ref="mail.model_mail_activity"/>
+        <field name="binding_model_id" ref="mail.model_mail_activity"/>
+        <field name="state">code</field>
+        <field name="code">records.action_done()</field>
+    </record>
+
+    <menuitem id="menu_taller_activities" name="Actividades" parent="menu_taller_root"
+              action="action_taller_activities" sequence="15"/>
+</odoo>

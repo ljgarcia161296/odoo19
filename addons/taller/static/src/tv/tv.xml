@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Tv">
+        <div class="o_taller_tv" t-ref="root">
+            <div class="tv-top">
+                <div>
+                    <div class="tv-brand"><t t-out="state.data.company"/></div>
+                    <div class="tv-clock"><t t-out="state.clock"/></div>
+                </div>
+                <div class="tv-stats">
+                    <div t-attf-class="tv-stat tv-stat-late #{state.data.late ? 'on' : ''}">
+                        <b><t t-out="state.data.late"/></b><span>Atrasadas</span>
+                    </div>
+                    <div class="tv-stat tv-stat-ready">
+                        <b><t t-out="state.data.ready"/></b><span>Listas para retirar</span>
+                    </div>
+                </div>
+                <button class="tv-fs" t-on-click="toggleFullscreen" title="Pantalla completa">
+                    <i t-attf-class="fa #{state.fullscreen ? 'fa-compress' : 'fa-expand'}"/>
+                </button>
+            </div>
+            <div class="tv-cols">
+                <div t-foreach="state.data.columns" t-as="col" t-key="col.key" t-attf-class="tv-col tv-col-#{col.key}">
+                    <div class="tv-col-head">
+                        <span><t t-out="col.label"/></span>
+                        <b><t t-out="col.count"/></b>
+                    </div>
+                    <div t-foreach="col.orders" t-as="o" t-key="o.id"
+                         t-attf-class="tv-card #{o.late ? 'late' : ''}">
+                        <div class="tv-card-top">
+                            <b><t t-out="o.name"/></b>
+                            <span t-if="o.promise" class="tv-date"><i class="fa fa-calendar"/> <t t-out="o.promise"/></span>
+                        </div>
+                        <div class="tv-device"><t t-out="o.device"/></div>
+                        <div class="tv-name"><t t-out="o.first_name"/></div>
+                    </div>
+                    <div t-if="col.more" class="tv-more">+ <t t-out="col.more"/> más</div>
+                    <div t-if="!col.count" class="tv-empty">Sin órdenes</div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>
