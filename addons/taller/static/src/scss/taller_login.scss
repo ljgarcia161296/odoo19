@@ -1,6 +1,6 @@
 // Pantalla de inicio de sesión con la marca del taller
 html, body {
-    background: linear-gradient(135deg, #0f4c5c 0%, #17798f 55%, #1fa3b5 100%) !important;
+    background: linear-gradient(135deg, var(--t-primary, #0f4c5c) 0%, #17798f 55%, #1fa3b5 100%) !important;
     min-height: 100vh;
 }
 .card.o_database_list {
@@ -12,11 +12,11 @@ html, body {
     display: block;
     margin-top: 10px;
     font-weight: 700;
-    color: #0f4c5c;
+    color: var(--t-primary, #0f4c5c);
 }
 .btn-primary {
-    background-color: #0f4c5c !important;
-    border-color: #0f4c5c !important;
+    background-color: var(--t-primary, #0f4c5c) !important;
+    border-color: var(--t-primary, #0f4c5c) !important;
 }
 .btn-primary:hover, .btn-primary:focus {
     background-color: #17798f !important;

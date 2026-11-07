@@ -26,7 +26,7 @@
         font-size: 17px; font-weight: 700; border-bottom: 3px solid #1fa3b5; padding-bottom: 8px;
         b { font-size: 26px; }
     }
-    .tv-col-quote .tv-col-head { border-bottom-color: #e8a33d; }
+    .tv-col-quote .tv-col-head { border-bottom-color: var(--t-accent, #e8a33d); }
     .tv-col-repairing .tv-col-head { border-bottom-color: #8f7bff; }
     .tv-col-done .tv-col-head { border-bottom-color: #6be0a0; }
 

@@ -34,6 +34,12 @@
                     .stars label { display: inline-block; margin-right: 10px; }
                     textarea { width: 100%; box-sizing: border-box; min-height: 70px; margin-top: 8px; }
                     button { background: #0f4c5c; color: #fff; border: 0; border-radius: 8px; padding: 10px 18px; margin-top: 10px; font-size: 15px; }
+                    .tp-table { width: 100%; border-collapse: collapse; margin: 8px 0 12px; }
+                    .tp-table td { padding: 7px 0; border-bottom: 1px solid #eef2f4; }
+                    .tp-btns { display: flex; gap: 10px; }
+                    .tp-btns button { flex: 1; margin-top: 0; padding: 13px; font-weight: 700; }
+                    .tp-ok { background: #2e8b57 !important; }
+                    .tp-no { background: #d64545 !important; }
                 </style>
             </t>
             <div class="tp-wrap">
@@ -42,6 +48,10 @@
                     <h1>Orden <t t-out="order.name"/></h1>
                     <div><t t-out="device"/></div>
                     <div class="muted"><t t-out="customer"/></div>
+                </div>
+
+                <div class="tp-card" t-if="notice">
+                    <strong><t t-out="notice"/></strong>
                 </div>
 
                 <div class="tp-card" t-if="thanks">
@@ -60,6 +70,56 @@
                     <div class="row" t-if="ready"><span>Disponible desde</span><span><t t-out="ready"/></span></div>
                     <div class="row" t-if="amount"><span>Total</span><span><t t-out="amount"/></span></div>
                     <div class="row" t-if="balance"><span>Saldo a pagar</span><span><t t-out="balance"/></span></div>
+                </div>
+
+                <div class="tp-card" t-if="quote">
+                    <strong>Presupuesto</strong>
+                    <table class="tp-table">
+                        <tr t-foreach="quote['lines']" t-as="l">
+                            <td><t t-out="l['name']"/> <span class="muted">× <t t-out="l['qty']"/></span></td>
+                            <td style="text-align: right;"><t t-out="l['subtotal']"/></td>
+                        </tr>
+                        <tr t-if="quote['labor']">
+                            <td>Mano de obra</td>
+                            <td style="text-align: right;"><t t-out="quote['labor']"/></td>
+                        </tr>
+                        <tr>
+                            <td><b>Total</b></td>
+                            <td style="text-align: right;"><b><t t-out="quote['total']"/></b></td>
+                        </tr>
+                    </table>
+                    <form method="post" t-attf-action="/taller/presupuesto/#{token}" id="tp-quote-form">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <input type="hidden" name="signature" id="tp-signature"/>
+                        <div class="muted" style="margin-bottom: 4px;">Firme aquí para aprobar (opcional):</div>
+                        <canvas id="tp-pad" width="440" height="140" style="width: 100%; height: 140px; border: 1px dashed #99a; border-radius: 8px; background: #fff; touch-action: none;"></canvas>
+                        <button type="button" id="tp-clear" style="background: #8a979d; margin: 4px 0 10px; padding: 6px 12px; font-size: 13px;">Borrar firma</button>
+                        <div class="tp-btns">
+                            <button type="submit" name="decision" value="approve" class="tp-ok" id="tp-approve">Aprobar presupuesto</button>
+                            <button type="submit" name="decision" value="reject" class="tp-no"
+                                    onclick="return confirm('¿Rechazar el presupuesto?');">Rechazar</button>
+                        </div>
+                    </form>
+                    <script>
+                        (function () {
+                            var pad = document.getElementById('tp-pad');
+                            if (!pad) { return; }
+                            var ctx = pad.getContext('2d');
+                            ctx.lineWidth = 2.2; ctx.lineCap = 'round'; ctx.strokeStyle = '#0b2a33';
+                            var drawing = false, dirty = false;
+                            function pos(e) {
+                                var r = pad.getBoundingClientRect();
+                                return { x: (e.clientX - r.left) * pad.width / r.width, y: (e.clientY - r.top) * pad.height / r.height };
+                            }
+                            pad.addEventListener('pointerdown', function (e) { drawing = true; var p = pos(e); ctx.beginPath(); ctx.moveTo(p.x, p.y); pad.setPointerCapture(e.pointerId); });
+                            pad.addEventListener('pointermove', function (e) { if (!drawing) { return; } var p = pos(e); ctx.lineTo(p.x, p.y); ctx.stroke(); dirty = true; });
+                            pad.addEventListener('pointerup', function () { drawing = false; });
+                            document.getElementById('tp-clear').addEventListener('click', function () { ctx.clearRect(0, 0, pad.width, pad.height); dirty = false; });
+                            document.getElementById('tp-approve').addEventListener('click', function () {
+                                document.getElementById('tp-signature').value = dirty ? pad.toDataURL('image/png') : '';
+                            });
+                        })();
+                    </script>
                 </div>
 
                 <t t-if="order.status == 'delivered' and not order.rating">
@@ -86,6 +146,42 @@
 
                 <div class="tp-card muted" t-if="request.env.company.phone">
                     Consultas: <t t-out="request.env.company.phone"/>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <template id="kiosk_page" name="Consulta de estado">
+        <t t-call="web.layout">
+            <t t-set="title">Consulte su equipo</t>
+            <t t-set="head">
+                <meta name="viewport" content="width=device-width, initial-scale=1"/>
+                <style>
+                    body { font-family: -apple-system, 'Segoe UI', Roboto, Arial, sans-serif; background: #0f4c5c; margin: 0; color: #1b2a30; }
+                    .tk-wrap { max-width: 460px; margin: 8vh auto 0; padding: 16px; }
+                    .tk-card { background: #fff; border-radius: 18px; padding: 26px; box-shadow: 0 10px 40px rgba(0,0,0,.25); }
+                    h1 { font-size: 24px; margin: 0 0 4px; }
+                    .muted { color: #667; font-size: 14px; margin-bottom: 16px; }
+                    label { display: block; font-size: 13px; font-weight: 700; margin: 12px 0 4px; }
+                    input { width: 100%; box-sizing: border-box; font-size: 20px; padding: 12px; border: 1px solid #cfd8dd; border-radius: 10px; }
+                    button { width: 100%; margin-top: 18px; background: #0f4c5c; color: #fff; border: 0; border-radius: 10px; padding: 14px; font-size: 18px; font-weight: 700; }
+                    .err { background: #fde0e0; color: #9b2c2c; padding: 10px; border-radius: 8px; margin-top: 12px; font-size: 14px; }
+                </style>
+            </t>
+            <div class="tk-wrap">
+                <div class="tk-card">
+                    <div class="muted"><t t-out="request.env.company.name"/></div>
+                    <h1>Consulte el estado de su equipo</h1>
+                    <div class="muted">Ingrese el número de su orden y los últimos 4 dígitos de su teléfono.</div>
+                    <form method="post" action="/taller/kiosco">
+                        <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                        <label>Número de orden</label>
+                        <input type="text" name="numero" autocomplete="off" required="required" placeholder="Ej: OS00012"/>
+                        <label>Últimos 4 dígitos del teléfono</label>
+                        <input type="text" name="telefono" inputmode="numeric" maxlength="4" autocomplete="off" required="required"/>
+                        <div class="err" t-if="error"><t t-out="error"/></div>
+                        <button type="submit">Consultar</button>
+                    </form>
                 </div>
             </div>
         </t>

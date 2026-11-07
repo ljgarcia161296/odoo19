@@ -69,13 +69,39 @@
     <template id="report_service_order_brand" inherit_id="report_service_order">
         <xpath expr="//div[hasclass('page')]" position="inside">
             <style>
-                .page h2 { color: #0f4c5c; border-bottom: 3px solid #e8a33d; padding-bottom: 6px; }
-                .page h5 { color: #0f4c5c; text-transform: uppercase; letter-spacing: 0.05em;
-                           font-size: 12px; margin-top: 18px; }
-                .page table.table thead th { background-color: #0f4c5c; color: #ffffff; border-color: #0f4c5c; }
+                .page { font-size: 13px; color: #1b2a30; }
+                .page h2 { color: #0f4c5c; border-bottom: 3px solid #e8a33d; padding-bottom: 6px; margin-bottom: 14px; }
+                .page h5 { color: #0f4c5c; text-transform: uppercase; letter-spacing: 0.06em;
+                           font-size: 11px; margin-top: 18px; margin-bottom: 6px; border-left: 4px solid #e8a33d; padding-left: 8px; }
+                .page .row.mt-3.mb-3 { background-color: #f3f6f8; border-radius: 6px; padding: 12px 8px; }
+                .page table.table thead th { background-color: #0f4c5c; color: #ffffff; border-color: #0f4c5c; font-size: 12px; }
                 .page table.table tbody tr:nth-child(even) { background-color: #f3f6f8; }
-                .page strong { color: #1b2a30; }
+                .page table.table td { border-color: #e3e9ec; }
+                .page strong { color: #0f4c5c; }
+                .page .col-6.offset-6 table tr:last-child td { background-color: #0f4c5c; color: #ffffff; font-size: 15px; }
+                .page .col-6.offset-6 table tr:last-child td strong { color: #ffffff; }
+                .page .taller-terms { margin-top: 22px; padding: 10px 12px; background-color: #fbf3e2; border-left: 4px solid #e8a33d;
+                                      font-size: 11px; color: #5a4a22; }
+                .page .taller-sign { margin-top: 36px; }
+                .page .taller-sign td { width: 50%; text-align: center; padding-top: 6px; border-top: 1px solid #1b2a30; font-size: 11px; color: #6b7a82; }
+                .page .taller-sign td.gap { border-top: 0; width: 8%; }
             </style>
+        </xpath>
+        <xpath expr="//div[hasclass('page')]" position="inside">
+            <div class="taller-terms">
+                <strong>Condiciones:</strong>
+                <t t-if="o.warranty_days">La reparación tiene una garantía de <strong><t t-out="o.warranty_days"/> días</strong> desde la entrega, sobre el trabajo realizado y los repuestos colocados.</t>
+                <t t-set="custom_terms" t-value="o.env['ir.config_parameter'].sudo().get_param('taller.pdf_terms', '')"/>
+                <t t-if="custom_terms"><span t-out="custom_terms" style="white-space: pre-line;"/></t>
+                Conserve este documento para retirar su equipo.
+            </div>
+            <table class="taller-sign" style="width: 100%;">
+                <tr>
+                    <td>Firma del cliente</td>
+                    <td class="gap"></td>
+                    <td>Firma del taller</td>
+                </tr>
+            </table>
         </xpath>
     </template>
 

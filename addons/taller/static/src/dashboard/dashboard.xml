@@ -14,10 +14,10 @@
                     <button class="td-btn td-btn-primary" t-on-click="() => this.newOrder()">
                         <i class="fa fa-plus"/> Nueva orden
                     </button>
-                    <button class="td-btn" t-on-click="() => this.goTo('taller.action_service_order')">
+                    <button class="td-btn" t-on-click="() => this.goTo('taller.action_taller_board')">
                         <i class="fa fa-columns"/> Órdenes
                     </button>
-                    <button class="td-btn" t-on-click="() => this.goTo('taller.action_taller_clientes')">
+                    <button class="td-btn" t-on-click="() => this.goTo('taller.action_taller_clientes_ui')">
                         <i class="fa fa-users"/> Clientes
                     </button>
                     <t t-if="state.data.is_manager">
@@ -34,14 +34,61 @@
                 </div>
             </div>
 
+            <div t-if="state.extra" class="td-today">
+                <div class="td-today-item"><i class="fa fa-sign-in"/><span>Ingresaron hoy</span><b><t t-out="state.extra.created_today"/></b></div>
+                <div class="td-today-item"><i class="fa fa-check-circle"/><span>Entregadas hoy</span><b><t t-out="state.extra.delivered_today"/></b></div>
+                <t t-if="state.extra.is_manager">
+                    <div class="td-today-item"><i class="fa fa-money"/><span>Cobrado hoy</span><b><t t-out="moneyExtra(state.extra.cash_today)"/></b></div>
+                    <div class="td-today-item"><i class="fa fa-shopping-cart"/><span>Ventas de mostrador</span><b><t t-out="state.extra.sales_today"/></b></div>
+                </t>
+            </div>
+
             <div class="td-grid">
                 <div t-foreach="state.data.kpis" t-as="kpi" t-key="kpi.key"
                      t-attf-class="td-card td-tone-#{kpi.tone} #{kpi.alert ? 'td-alert' : ''} #{kpi.changed ? 'td-changed' : ''}"
                      t-attf-style="animation-delay: #{kpi_index * 70}ms"
+                     draggable="true" title="Arrastrá para reordenar"
+                     t-on-dragstart="(ev) => this.kpiDragStart(kpi, ev)"
+                     t-on-dragover.prevent=""
+                     t-on-drop="(ev) => this.kpiDrop(kpi, ev)"
                      t-on-click="() => this.openKpi(kpi)">
                     <div class="td-card-icon"><i t-attf-class="fa #{kpi.icon}"/></div>
                     <div class="td-card-value"><t t-out="format(kpi, kpi_index)"/></div>
                     <div class="td-card-label"><t t-out="kpi.label"/></div>
+                </div>
+            </div>
+
+            <div t-if="state.extra and attentionCount" class="td-panel td-attention">
+                <div class="td-panel-title"><i class="fa fa-bell-o"/> Requiere atención <span class="td-count"><t t-out="attentionCount"/></span></div>
+                <div class="td-att-cols">
+                    <div t-if="state.extra.attention.late.length" class="td-att-col">
+                        <div class="td-att-title td-red">Atrasadas</div>
+                        <div t-foreach="state.extra.attention.late" t-as="o" t-key="o.id" class="td-recent" t-on-click="() => this.openOrder(o.id)">
+                            <div class="td-recent-main"><div class="td-recent-name"><t t-out="o.name"/> · <t t-out="o.customer"/></div>
+                                <div class="td-recent-sub"><t t-out="o.device"/> · <t t-out="o.extra"/></div></div>
+                        </div>
+                    </div>
+                    <div t-if="state.extra.attention.waiting.length" class="td-att-col">
+                        <div class="td-att-title td-amber">Listas sin retirar</div>
+                        <div t-foreach="state.extra.attention.waiting" t-as="o" t-key="o.id" class="td-recent" t-on-click="() => this.openOrder(o.id)">
+                            <div class="td-recent-main"><div class="td-recent-name"><t t-out="o.name"/> · <t t-out="o.customer"/></div>
+                                <div class="td-recent-sub"><t t-out="o.device"/> · <t t-out="o.extra"/></div></div>
+                        </div>
+                    </div>
+                    <div t-if="state.extra.attention.quotes.length" class="td-att-col">
+                        <div class="td-att-title td-blue">Presupuestos sin respuesta</div>
+                        <div t-foreach="state.extra.attention.quotes" t-as="o" t-key="o.id" class="td-recent" t-on-click="() => this.openOrder(o.id)">
+                            <div class="td-recent-main"><div class="td-recent-name"><t t-out="o.name"/> · <t t-out="o.customer"/></div>
+                                <div class="td-recent-sub"><t t-out="o.device"/> · <t t-out="o.extra"/></div></div>
+                        </div>
+                    </div>
+                    <div t-if="state.extra.attention.low_stock.length" class="td-att-col">
+                        <div class="td-att-title td-purple">Stock bajo</div>
+                        <div t-foreach="state.extra.attention.low_stock" t-as="p" t-key="p.id" class="td-recent" t-on-click="openPartList">
+                            <div class="td-recent-main"><div class="td-recent-name"><t t-out="p.name"/></div>
+                                <div class="td-recent-sub">Hay <t t-out="p.stock"/> · mínimo <t t-out="p.min"/></div></div>
+                        </div>
+                    </div>
                 </div>
             </div>
 

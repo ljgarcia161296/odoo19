@@ -4,11 +4,21 @@ import { registry } from "@web/core/registry";
 import { useService } from "@web/core/utils/hooks";
 import { Component, onWillStart, onMounted, onWillUnmount, useState } from "@odoo/owl";
 
+const ORDER_KEY = "taller.dashboard.order";
+
+function readOrder() {
+    try {
+        return JSON.parse(localStorage.getItem(ORDER_KEY) || "[]");
+    } catch (e) {
+        return [];
+    }
+}
+
 class TallerDashboard extends Component {
     setup() {
         this.orm = useService("orm");
         this.action = useService("action");
-        this.state = useState({ data: null, shown: [], barsReady: false });
+        this.state = useState({ data: null, shown: [], barsReady: false, extra: null });
         this.frame = null;
         this.refreshTimer = null;
         this.onLive = () => {
@@ -36,8 +46,61 @@ class TallerDashboard extends Component {
 
     async load() {
         const data = await this.orm.call("service.order", "get_dashboard_data", []);
+        this.applyOrder(data);
         this.state.data = data;
         this.state.shown = data.kpis.map(() => 0);
+        try {
+            this.state.extra = await this.orm.call("service.order", "dash_extra", []);
+        } catch (e) {
+            this.state.extra = null;
+        }
+    }
+
+    applyOrder(data) {
+        const order = readOrder();
+        if (order.length) {
+            const rank = (k) => (order.indexOf(k) === -1 ? 999 : order.indexOf(k));
+            data.kpis.sort((a, b) => rank(a.key) - rank(b.key));
+        }
+    }
+
+    kpiDragStart(kpi, ev) {
+        this.dragKey = kpi.key;
+        ev.dataTransfer.effectAllowed = "move";
+        ev.dataTransfer.setData("text/plain", kpi.key);
+    }
+
+    kpiDrop(target, ev) {
+        ev.preventDefault();
+        const from = this.state.data.kpis.findIndex((k) => k.key === this.dragKey);
+        const to = this.state.data.kpis.findIndex((k) => k.key === target.key);
+        this.dragKey = null;
+        if (from < 0 || to < 0 || from === to) {
+            return;
+        }
+        const [moved] = this.state.data.kpis.splice(from, 1);
+        this.state.data.kpis.splice(to, 0, moved);
+        const [shown] = this.state.shown.splice(from, 1);
+        this.state.shown.splice(to, 0, shown);
+        try {
+            localStorage.setItem(ORDER_KEY, JSON.stringify(this.state.data.kpis.map((k) => k.key)));
+        } catch (e) {
+            // sin almacenamiento: el orden vale solo para esta sesion
+        }
+    }
+
+    moneyExtra(value) {
+        const number = new Intl.NumberFormat("es-UY", { maximumFractionDigits: 0 }).format(value || 0);
+        return `${this.state.extra ? this.state.extra.symbol : ""} ${number}`.trim();
+    }
+
+    get attentionCount() {
+        const a = this.state.extra && this.state.extra.attention;
+        return a ? a.late.length + a.waiting.length + a.quotes.length + a.low_stock.length : 0;
+    }
+
+    openPartList() {
+        this.action.doAction("taller.action_taller_inventario_ui");
     }
 
     async refresh() {
@@ -58,6 +121,7 @@ class TallerDashboard extends Component {
         for (const kpi of data.kpis) {
             kpi.changed = previous[kpi.key] !== undefined && previous[kpi.key] !== kpi.value;
         }
+        this.applyOrder(data);
         this.state.data = data;
         this.state.shown = data.kpis.map((kpi) => kpi.value);
         setTimeout(() => {
@@ -187,13 +251,7 @@ class TallerDashboard extends Component {
     }
 
     openOrder(id) {
-        this.action.doAction({
-            type: "ir.actions.act_window",
-            res_model: "service.order",
-            res_id: id,
-            views: [[false, "form"]],
-            target: "current",
-        });
+        this.action.doAction({ type: "ir.actions.client", tag: "taller.ficha", params: { id } });
     }
 
     newOrder() {

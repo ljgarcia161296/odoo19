@@ -43,13 +43,7 @@ const tallerLiveService = {
         };
 
         const openOrder = (id) => {
-            action.doAction({
-                type: "ir.actions.act_window",
-                res_model: "service.order",
-                res_id: id,
-                views: [[false, "form"]],
-                target: "current",
-            });
+            action.doAction({ type: "ir.actions.client", tag: "taller.ficha", params: { id } });
         };
 
         let reloadTimer = null;

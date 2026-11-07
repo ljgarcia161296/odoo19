@@ -42,7 +42,10 @@ class ServiceOrder(models.Model):
         tracking=True, group_expand='_expand_status')
     date_received = fields.Date(string='Fecha de Ingreso', default=fields.Date.today)
     date_finished = fields.Date(string='Fecha de Entrega')
-    warranty_days = fields.Integer(string='Días de garantía', default=30)
+    warranty_days = fields.Integer(
+        string='Días de garantía',
+        default=lambda self: int(self.env['ir.config_parameter'].sudo().get_param(
+            'taller.default_warranty_days', 30) or 0))
     warranty_end = fields.Date(string='Garantía hasta', compute='_compute_warranty_end', store=True)
     warranty_status = fields.Selection([
         ('none', 'Sin garantía'),
@@ -218,9 +221,10 @@ class ServiceOrder(models.Model):
             text = 'Hola %s, su %s (orden %s) está listo para retirar. Total: %.2f' % (
                 name, device, self.name, self.total)
         elif self.status == 'quote':
+            self._ensure_token()
             text = ('Hola %s, el presupuesto de su %s (orden %s) es de %.2f. '
-                    '¿Nos confirma si lo aprueba para comenzar la reparación?') % (
-                name, device, self.name, self.total)
+                    'Puede revisarlo y aprobarlo o rechazarlo desde este enlace: %s') % (
+                name, device, self.name, self.total, self.public_url)
         elif self.status in ('diagnosing', 'repairing'):
             text = ('Hola %s, le escribimos por su %s (orden %s). Estamos trabajando en él '
                     'y le avisaremos cuando esté listo.') % (name, device, self.name)

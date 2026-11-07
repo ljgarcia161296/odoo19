@@ -361,11 +361,9 @@ class TallerCounter extends Component {
 
     openOrder() {
         this.action.doAction({
-            type: "ir.actions.act_window",
-            res_model: "service.order",
-            res_id: this.state.done.id,
-            views: [[false, "form"]],
-            target: "current",
+            type: "ir.actions.client",
+            tag: "taller.ficha",
+            params: { id: this.state.done.id },
         });
     }
 

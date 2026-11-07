@@ -7,21 +7,21 @@
     position: relative;
 
     .tt-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
-    .tt-title { font-size: 24px; font-weight: 800; color: #0f4c5c; }
+    .tt-title { font-size: 24px; font-weight: 800; color: var(--t-primary, #0f4c5c); }
     .tt-sub, .tt-muted { color: #6b7a82; font-size: 13px; }
     .tt-chip {
         border: 1px solid #cfd8dd; background: #fff; border-radius: 999px; padding: 6px 14px; cursor: pointer;
-        &.on { background: #0f4c5c; color: #fff; border-color: #0f4c5c; }
+        &.on { background: var(--t-primary, #0f4c5c); color: #fff; border-color: var(--t-primary, #0f4c5c); }
     }
 
     .tt-tabs { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 6px; margin-bottom: 8px; }
     .tt-tab {
         flex: none; border: 0; border-radius: 999px; padding: 10px 16px; background: #e3eaee; color: #44545c;
         font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
-        &.on { background: #0f4c5c; color: #fff; }
+        &.on { background: var(--t-primary, #0f4c5c); color: #fff; }
     }
     .tt-count { background: rgba(255, 255, 255, 0.28); border-radius: 999px; padding: 0 8px; font-size: 12px; }
-    .tt-tab:not(.on) .tt-count { background: #fff; color: #0f4c5c; }
+    .tt-tab:not(.on) .tt-count { background: #fff; color: var(--t-primary, #0f4c5c); }
 
     .tt-empty { text-align: center; color: #8a98a0; padding: 50px 10px; i { font-size: 44px; display: block; margin-bottom: 8px; } }
 
@@ -34,19 +34,19 @@
         &:active { transform: scale(0.985); }
     }
     .tt-st-diagnosing { border-left-color: #3b7dd8; }
-    .tt-st-quote { border-left-color: #e8a33d; }
+    .tt-st-quote { border-left-color: var(--t-accent, #e8a33d); }
     .tt-st-repairing { border-left-color: #7a5af8; }
     .tt-st-done { border-left-color: #2e8b57; }
     .tt-st-delivered { border-left-color: #5fbf8a; }
     .tt-row { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
-    .tt-name { color: #0f4c5c; font-size: 17px; }
+    .tt-name { color: var(--t-primary, #0f4c5c); font-size: 17px; }
     .tt-customer { font-weight: 700; margin-top: 4px; }
     .tt-device { color: #6b7a82; margin-top: 2px; }
     .tt-problem { margin-top: 6px; font-size: 14px; color: #44545c; }
     .tt-foot { margin-top: 10px; font-size: 14px; }
     .tt-late { color: #d64545; font-weight: 700; }
 
-    .tt-pill { padding: 3px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #e3eef1; color: #0f4c5c; white-space: nowrap; }
+    .tt-pill { padding: 3px 11px; border-radius: 999px; font-size: 12px; font-weight: 700; background: #e3eef1; color: var(--t-primary, #0f4c5c); white-space: nowrap; }
     .tt-pill-quote { background: #fbefd9; color: #9a6a12; }
     .tt-pill-repairing { background: #e4ecfb; color: #2a5db0; }
     .tt-pill-done { background: #dff3e8; color: #1f6b43; }
@@ -61,7 +61,7 @@
         max-width: 720px; margin: 0 auto;
     }
     .tt-sheet-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 10px; }
-    .tt-sheet-title { font-size: 22px; font-weight: 800; color: #0f4c5c; }
+    .tt-sheet-title { font-size: 22px; font-weight: 800; color: var(--t-primary, #0f4c5c); }
     .tt-x { border: 0; background: #eef2f4; width: 38px; height: 38px; border-radius: 50%; font-size: 22px; cursor: pointer; }
     .tt-contact, .tt-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
     .tt-btn {
@@ -70,7 +70,7 @@
         justify-content: center; gap: 8px; cursor: pointer; flex: 1 1 auto;
         &:disabled { opacity: 0.5; }
     }
-    .tt-primary { background: #0f4c5c; border-color: #0f4c5c; color: #fff; font-weight: 700; }
+    .tt-primary { background: var(--t-primary, #0f4c5c); border-color: var(--t-primary, #0f4c5c); color: #fff; font-weight: 700; }
     .tt-full { width: 100%; margin-top: 12px; }
     .tt-block { border-top: 1px solid #eef2f4; padding: 12px 0; }
     .tt-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7a82; margin-bottom: 4px; }

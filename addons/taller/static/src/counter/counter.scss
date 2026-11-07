@@ -6,7 +6,7 @@
     color: #1b2a30;
 
     .tc-wrap { max-width: 860px; margin: 0 auto; }
-    .tc-title { font-size: 24px; font-weight: 800; color: #0f4c5c; margin-bottom: 12px; }
+    .tc-title { font-size: 24px; font-weight: 800; color: var(--t-primary, #0f4c5c); margin-bottom: 12px; }
     .tc-muted { color: #6b7a82; font-size: 13px; }
     .tc-card {
         background: #fff; border-radius: 16px; padding: 20px;
@@ -25,15 +25,15 @@
         width: 24px; height: 24px; border-radius: 50%; background: #c9d3d8; color: #fff;
         display: inline-flex; align-items: center; justify-content: center; font-weight: 700; flex: none;
     }
-    .tc-step.active { background: #0f4c5c; color: #fff; }
-    .tc-step.active .tc-step-num { background: #e8a33d; color: #1b2a30; }
+    .tc-step.active { background: var(--t-primary, #0f4c5c); color: #fff; }
+    .tc-step.active .tc-step-num { background: var(--t-accent, #e8a33d); color: #1b2a30; }
     .tc-step.done { background: #dff3e8; color: #1f6b43; }
     .tc-step.done .tc-step-num { background: #2e8b57; }
 
     .tc-input {
         width: 100%; box-sizing: border-box; font-size: 16px; padding: 12px 14px;
         border: 1px solid #cfd8dd; border-radius: 12px; margin-bottom: 10px; background: #fff;
-        &:focus { outline: none; border-color: #0f4c5c; box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.15); }
+        &:focus { outline: none; border-color: var(--t-primary, #0f4c5c); box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.15); }
     }
     .tc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0 12px; }
     .tc-label { display: block; font-size: 13px; color: #44545c; margin: 6px 0 4px; font-weight: 600; }
@@ -45,9 +45,9 @@
         &:hover:not(:disabled) { transform: translateY(-1px); box-shadow: 0 4px 10px rgba(20, 40, 50, 0.12); }
         &:disabled { opacity: 0.45; cursor: not-allowed; }
     }
-    .tc-btn-primary { background: #0f4c5c; border-color: #0f4c5c; color: #fff; font-weight: 700; }
+    .tc-btn-primary { background: var(--t-primary, #0f4c5c); border-color: var(--t-primary, #0f4c5c); color: #fff; font-weight: 700; }
     .tc-btn-small { padding: 6px 12px; min-height: 0; font-size: 13px; }
-    .tc-btn-link { border: 0; background: none; color: #0f4c5c; font-weight: 700; padding-left: 0; }
+    .tc-btn-link { border: 0; background: none; color: var(--t-primary, #0f4c5c); font-weight: 700; padding-left: 0; }
     .tc-actions { display: flex; flex-wrap: wrap; gap: 10px; margin: 10px 0; }
 
     .tc-selected {
@@ -60,7 +60,7 @@
     .tc-row {
         display: flex; flex-direction: column; padding: 10px 12px; border-radius: 10px; cursor: pointer;
         border: 1px solid #e3e9ec; margin-bottom: 6px;
-        &:hover { background: #f3f8f9; border-color: #0f4c5c; }
+        &:hover { background: #f3f8f9; border-color: var(--t-primary, #0f4c5c); }
     }
     .tc-new { background: #f7f9fa; border-radius: 12px; padding: 12px; margin-top: 6px; }
 
@@ -69,9 +69,9 @@
         display: flex; flex-direction: column; align-items: center; gap: 6px; padding: 14px 8px;
         border: 2px solid #dbe3e7; border-radius: 14px; background: #fff; cursor: pointer; font-weight: 600;
         i { font-size: 28px; color: #6b7a82; }
-        &.active { border-color: #0f4c5c; background: #e8f3f5; i { color: #0f4c5c; } }
+        &.active { border-color: var(--t-primary, #0f4c5c); background: #e8f3f5; i { color: var(--t-primary, #0f4c5c); } }
     }
-    .tc-alert { background: #fdf3e0; border-left: 4px solid #e8a33d; border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; font-size: 14px; }
+    .tc-alert { background: #fdf3e0; border-left: 4px solid var(--t-accent, #e8a33d); border-radius: 10px; padding: 10px 12px; margin-bottom: 10px; font-size: 14px; }
 
     .tc-checks { display: grid; gap: 8px; }
     .tc-check {
@@ -114,6 +114,9 @@
 @keyframes tcFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
 @keyframes tcPop { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
 @media (max-width: 640px) {
+    .o_taller_counter input, .o_taller_counter select, .o_taller_counter textarea { font-size: 16px; }
+    .o_taller_counter .tc-grid { grid-template-columns: 1fr; }
+    .o_taller_counter button { min-height: 44px; }
     .o_taller_counter .tc-step-name { display: none; }
 }
 @media (prefers-reduced-motion: reduce) {

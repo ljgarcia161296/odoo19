@@ -20,7 +20,7 @@ class TallerPublic(http.Controller):
             [('access_token', '=', token)], limit=1)
 
     @http.route('/taller/estado/<string:token>', type='http', auth='public', methods=['GET'])
-    def estado(self, token, gracias=None, **kw):
+    def estado(self, token, gracias=None, aviso=None, **kw):
         order = self._order(token)
         if not order:
             return request.render('taller.status_not_found', {}, status=404)
@@ -44,7 +44,42 @@ class TallerPublic(http.Controller):
             'amount': '%s %.2f' % (symbol, order.total) if show_amount else '',
             'balance': '%s %.2f' % (symbol, order.balance) if (show_amount and order.paid_total) else '',
         }
+        quote = None
+        if order.status == 'quote':
+            quote = {
+                'lines': [{
+                    'name': line.name,
+                    'qty': '%g' % line.quantity,
+                    'subtotal': '%s %.2f' % (symbol, line.subtotal),
+                } for line in order.line_ids],
+                'labor': ('%s %.2f' % (symbol, order.labor_cost)) if order.labor_cost else '',
+                'total': '%s %.2f' % (symbol, order.total),
+            }
+        notices = {
+            'aprobado': '¡Gracias! Recibimos su aprobación y comenzamos la reparación.',
+            'rechazado': 'Recibimos su respuesta: el presupuesto fue rechazado. '
+                         'El taller se pondrá en contacto con usted.',
+        }
+        values['quote'] = quote
+        values['notice'] = notices.get(aviso, '')
         return request.render('taller.status_page', values)
+
+    @http.route('/taller/presupuesto/<string:token>', type='http', auth='public',
+                methods=['POST'], csrf=True)
+    def presupuesto(self, token, decision=None, signature=None, **kw):
+        order = self._order(token)
+        if not order or order.status != 'quote' or decision not in ('approve', 'reject'):
+            return request.redirect('/taller/estado/%s' % token)
+        if decision == 'approve':
+            image = order._counter_b64(signature) if signature and len(signature) < 400000 else False
+            if image:
+                order.write({'quote_signature': image, 'quote_signed_date': fields.Datetime.now()})
+            order.action_approve_quote()
+            notice = 'aprobado'
+        else:
+            order.action_reject_quote()
+            notice = 'rechazado'
+        return request.redirect('/taller/estado/%s?aviso=%s' % (token, notice))
 
     @http.route('/taller/encuesta/<string:token>', type='http', auth='public',
                 methods=['POST'], csrf=True)
@@ -59,3 +94,21 @@ class TallerPublic(http.Controller):
                 'rating_date': fields.Date.today(),
             })
         return request.redirect('/taller/estado/%s?gracias=1' % token)
+
+    # ------------------------------------------------------------------ kiosco de consulta
+    @http.route('/taller/kiosco', type='http', auth='public', methods=['GET', 'POST'], csrf=True)
+    def kiosco(self, numero='', telefono='', **kw):
+        error = ''
+        if request.httprequest.method == 'POST':
+            import re
+            import time
+            number = (numero or '').strip()[:40]
+            digits = re.sub(r'\D', '', telefono or '')[-4:]
+            order = request.env['service.order'].sudo().search([('name', '=ilike', number)], limit=1) if number else None
+            phone = re.sub(r'\D', '', order.partner_id.phone or '') if order else ''
+            if order and len(digits) == 4 and phone.endswith(digits):
+                order._ensure_token()
+                return request.redirect('/taller/estado/%s' % order.access_token)
+            time.sleep(1)
+            error = 'No encontramos esa orden. Revise el número y los últimos 4 dígitos de su teléfono.'
+        return request.render('taller.kiosk_page', {'error': error})

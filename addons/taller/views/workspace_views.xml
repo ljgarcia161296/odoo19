@@ -9,10 +9,29 @@
         <field name="tag">taller.tech</field>
     </record>
 
+    <record id="action_taller_board" model="ir.actions.client">
+        <field name="name">Órdenes de servicio</field>
+        <field name="tag">taller.board</field>
+    </record>
+
+    <record id="action_taller_caja" model="ir.actions.client">
+        <field name="name">Caja diaria</field>
+        <field name="tag">taller.caja</field>
+    </record>
+
+    <!-- El menú principal de órdenes abre el tablero; la lista clásica queda en Configuración -->
+    <menuitem id="menu_service_order" name="Órdenes de Servicio" parent="menu_taller_root"
+              action="action_taller_board" sequence="10"/>
+    <menuitem id="menu_taller_classic_orders" name="Órdenes (lista clásica)" parent="menu_taller_config"
+              action="action_service_order" sequence="30"/>
+
     <menuitem id="menu_taller_counter" name="Recepción" parent="menu_taller_root"
               action="action_taller_counter" sequence="2"/>
     <menuitem id="menu_taller_tech" name="Mi trabajo" parent="menu_taller_root"
               action="action_taller_tech" sequence="3"/>
+
+    <menuitem id="menu_taller_caja" name="Caja diaria" parent="menu_taller_root"
+              action="action_taller_caja" sequence="25" groups="group_taller_manager"/>
 
     <!-- Firma de conformidad al ingreso en el PDF de la orden -->
     <template id="report_service_order_intake_signature" inherit_id="report_service_order">

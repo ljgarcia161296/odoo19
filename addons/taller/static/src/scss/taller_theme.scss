@@ -1,15 +1,15 @@
 // Tema de marca para el backend (solo CSS, no toca las variables internas de Odoo)
 :root {
-    --taller-primary: #0f4c5c;
+    --taller-primary: var(--t-primary, #0f4c5c);
     --taller-primary-2: #17798f;
-    --taller-accent: #e8a33d;
-    --bs-primary: #0f4c5c;
+    --taller-accent: var(--t-accent, #e8a33d);
+    --bs-primary: var(--t-primary, #0f4c5c);
     --bs-primary-rgb: 15, 76, 92;
 }
 
 .o_main_navbar {
-    background: linear-gradient(90deg, #0f4c5c 0%, #17798f 100%) !important;
-    border-bottom: 3px solid #e8a33d;
+    background: linear-gradient(90deg, var(--t-primary, #0f4c5c) 0%, #17798f 100%) !important;
+    border-bottom: 3px solid var(--t-accent, #e8a33d);
 }
 .o_main_navbar .o_menu_sections .o_nav_entry:hover,
 .o_main_navbar .o_menu_sections .dropdown-toggle:hover,
@@ -19,14 +19,14 @@
 }
 
 .btn-primary {
-    --bs-btn-bg: #0f4c5c;
-    --bs-btn-border-color: #0f4c5c;
+    --bs-btn-bg: var(--t-primary, #0f4c5c);
+    --bs-btn-border-color: var(--t-primary, #0f4c5c);
     --bs-btn-hover-bg: #17798f;
     --bs-btn-hover-border-color: #17798f;
-    --bs-btn-active-bg: #0c3d4a;
-    --bs-btn-active-border-color: #0c3d4a;
-    background-color: #0f4c5c !important;
-    border-color: #0f4c5c !important;
+    --bs-btn-active-bg: var(--t-primary-dark, #0c3d4a);
+    --bs-btn-active-border-color: var(--t-primary-dark, #0c3d4a);
+    background-color: var(--t-primary, #0f4c5c) !important;
+    border-color: var(--t-primary, #0f4c5c) !important;
 }
 .btn-primary:hover, .btn-primary:focus {
     background-color: #17798f !important;
@@ -36,13 +36,13 @@
 // ---- Formulario de la orden
 .o_taller_form {
     .o_horizontal_separator {
-        color: #0f4c5c;
+        color: var(--t-primary, #0f4c5c);
         text-transform: uppercase;
         letter-spacing: 0.06em;
         font-size: 0.75rem;
         font-weight: 700;
     }
-    .oe_title h1 { font-weight: 800; color: #0f4c5c; }
+    .oe_title h1 { font-weight: 800; color: var(--t-primary, #0f4c5c); }
 }
 
 // ---- Tarjetas del kanban
@@ -53,13 +53,13 @@
     transition: transform 0.15s ease, box-shadow 0.15s ease;
     &:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(20, 40, 50, 0.15); }
     .o_taller_card_head { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
-    .o_taller_card_name { font-weight: 800; color: #0f4c5c; }
+    .o_taller_card_name { font-weight: 800; color: var(--t-primary, #0f4c5c); }
     .o_taller_card_badges { display: flex; gap: 4px; flex-wrap: wrap; justify-content: flex-end; }
     .o_taller_card_customer { display: flex; align-items: center; gap: 8px; margin-top: 6px; font-weight: 600; }
     .o_taller_avatar {
         width: 24px; height: 24px; border-radius: 50%;
         display: inline-flex; align-items: center; justify-content: center;
-        background: #0f4c5c; color: #fff; font-size: 12px; font-weight: 700;
+        background: var(--t-primary, #0f4c5c); color: #fff; font-size: 12px; font-weight: 700;
     }
     .o_taller_card_device { color: #6b7a82; margin-top: 4px; font-size: 0.9em; }
     .o_taller_card_dates { display: flex; gap: 12px; color: #6b7a82; margin-top: 6px; font-size: 0.85em; }
@@ -68,7 +68,7 @@
 }
 .o_taller_card_draft { border-left-color: #9aa7ad; }
 .o_taller_card_diagnosing { border-left-color: #3b7dd8; }
-.o_taller_card_quote { border-left-color: #e8a33d; }
+.o_taller_card_quote { border-left-color: var(--t-accent, #e8a33d); }
 .o_taller_card_repairing { border-left-color: #7a5af8; }
 .o_taller_card_done { border-left-color: #2e8b57; }
 .o_taller_card_delivered { border-left-color: #5fbf8a; }
@@ -115,5 +115,197 @@
     border-bottom: 1px solid #e3e9ec;
     box-shadow: 0 2px 6px rgba(20, 40, 50, 0.06);
 }
-.o_taller_form .o_taller_sb_name { font-weight: 800; color: #0f4c5c; font-size: 1.1em; }
+.o_taller_form .o_taller_sb_name { font-weight: 800; color: var(--t-primary, #0f4c5c); font-size: 1.1em; }
 .o_taller_form .o_taller_sb_money { margin-left: auto; display: inline-flex; gap: 14px; font-weight: 700; }
+
+/* ===== Estilo unificado ===== */
+body, .o_web_client {
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+.o_form_view .o_form_sheet_bg, .o_list_view, .o_kanban_view { background-color: #f3f6f8; }
+.o_form_sheet { border: 0 !important; border-radius: 16px; box-shadow: 0 2px 12px rgba(20, 40, 50, 0.08); }
+.o_control_panel { background: #ffffff; border-bottom: 1px solid #e3e9ec; }
+.btn { border-radius: 10px; font-weight: 600; }
+.badge { border-radius: 999px; font-weight: 600; }
+.modal-content { border: 0; border-radius: 18px; box-shadow: 0 24px 70px rgba(0, 0, 0, 0.3); }
+.o_list_view .o_list_table thead th {
+    background: #eef3f5;
+    color: #5a6b73;
+    text-transform: uppercase;
+    font-size: 0.72rem;
+    letter-spacing: 0.05em;
+    border-bottom: 2px solid #dbe4e8;
+}
+.o_list_view .o_data_row:hover { background-color: #eef7f8 !important; }
+.nav-tabs .nav-link.active { color: var(--t-primary, #0f4c5c); font-weight: 700; border-bottom: 3px solid var(--t-accent, #e8a33d); }
+.o_notification { border-radius: 14px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2); }
+.o_kanban_view .o_kanban_record { border-radius: 12px; }
+
+/* ===== Formularios y listas clasicos ===== */
+.o_form_view .o_form_sheet { padding: 22px 26px; }
+.o_form_view .o_group .o_form_label { color: #6b7a82; font-weight: 600; font-size: 0.85rem; }
+.o_form_view .o_field_widget input, .o_form_view .o_field_widget select, .o_form_view .o_field_widget textarea {
+    border-radius: 8px;
+}
+.o_form_view .o_inner_group > .o_wrap_field, .o_form_view .o_group > .o_wrap_field { margin-bottom: 2px; }
+.o_form_view .o_form_statusbar { background: #ffffff; border-bottom: 1px solid #e3e9ec; }
+.o_form_view .o_statusbar_status > .o_arrow_button.o_arrow_button_current { background: var(--t-primary, #0f4c5c); color: #ffffff; }
+.o_list_view .o_list_table tbody td { padding-top: 0.55rem; padding-bottom: 0.55rem; }
+.o_list_view .o_list_table { border-radius: 12px; overflow: hidden; }
+.o_kanban_view .o_kanban_record { box-shadow: 0 1px 5px rgba(20, 40, 50, 0.1); border: 0; transition: box-shadow 0.15s ease, transform 0.15s ease; }
+.o_kanban_view .o_kanban_record:hover { box-shadow: 0 6px 16px rgba(20, 40, 50, 0.16); transform: translateY(-2px); }
+.o_searchview { border-radius: 12px; }
+@media (max-width: 767px) {
+    .o_form_view .o_form_sheet { padding: 14px 12px; border-radius: 12px; }
+    .o_control_panel { padding-left: 8px; padding-right: 8px; }
+    .btn { min-height: 40px; }
+    .o_form_view input, .o_form_view select, .o_form_view textarea { font-size: 16px; }
+}
+
+/* ===== Modo oscuro (inversion de color del area de trabajo) ===== */
+html.o_taller_dark .o_action_manager { background: #ffffff; filter: invert(0.92) hue-rotate(180deg); }
+html.o_taller_dark .o_action_manager img,
+html.o_taller_dark .o_action_manager video,
+html.o_taller_dark .o_action_manager canvas,
+html.o_taller_dark .o_action_manager .o_field_image,
+html.o_taller_dark .o_action_manager .tf-photo { filter: invert(1) hue-rotate(180deg); }
+html.o_taller_dark .modal-content { filter: invert(0.92) hue-rotate(180deg); }
+html.o_taller_dark .tf-drawer { top: 0; }
+html.o_taller_dark body { background: #121212; }
+html.o_taller_dark .ts-modal { filter: invert(0.92) hue-rotate(180deg); }
+html.o_taller_dark .o_notification, html.o_taller_dark .o_popover, html.o_taller_dark .dropdown-menu { filter: invert(0.92) hue-rotate(180deg); }
+
+/* ===== Pulido general: tipografia, controles y detalles ===== */
+body { -webkit-font-smoothing: antialiased; text-rendering: optimizeLegibility; }
+.o_list_number, .o_field_monetary, .o_field_float, .o_field_integer, .o_data_cell.o_list_number { font-variant-numeric: tabular-nums; }
+::selection { background: rgba(232, 163, 61, 0.35); }
+
+/* Botones */
+.btn-primary { background-color: var(--t-primary, #0f4c5c); border-color: var(--t-primary, #0f4c5c); }
+.btn-primary:hover, .btn-primary:focus, .btn-primary:active { background-color: var(--t-primary-dark, #0c3d4a) !important; border-color: var(--t-primary-dark, #0c3d4a) !important; }
+.btn-primary:focus-visible, .btn:focus-visible { box-shadow: 0 0 0 3px rgba(15, 76, 92, 0.25) !important; outline: none; }
+.btn-secondary { background-color: #ffffff; border-color: #cfd8dd; color: #1b2a30; }
+.btn-secondary:hover { background-color: #eef7f8; border-color: #b5c4cb; color: #1b2a30; }
+
+/* Campos de formulario con caja */
+.o_form_view .o_field_widget:not(.o_readonly_modifier) .o_input,
+.o_form_view .o_field_widget:not(.o_readonly_modifier) input.o_input,
+.o_form_view .o_field_widget:not(.o_readonly_modifier) textarea.o_input,
+.o_form_view .o_field_widget:not(.o_readonly_modifier) select.o_input {
+    border: 1px solid #d3dce1;
+    border-radius: 8px;
+    background-color: #f9fbfc;
+    padding: 0.3rem 0.6rem;
+    transition: border-color 0.15s ease, box-shadow 0.15s ease, background-color 0.15s ease;
+}
+.o_form_view .o_field_widget:not(.o_readonly_modifier) .o_input:hover { border-color: #b5c4cb; }
+.o_form_view .o_field_widget:not(.o_readonly_modifier) .o_input:focus,
+.o_form_view .o_field_widget:not(.o_readonly_modifier) .o_input:focus-within {
+    background-color: #ffffff;
+    border-color: var(--t-primary, #0f4c5c);
+    box-shadow: 0 0 0 3px var(--t-ring, rgba(15, 76, 92, 0.14));
+    outline: none;
+}
+.o_form_view .o_field_widget.o_field_many2one .o_input_dropdown { border-radius: 8px; }
+.o_form_view .o_group .o_form_label { color: #6b7a82; font-weight: 600; font-size: 0.82rem; letter-spacing: 0.01em; }
+.o_form_view .o_form_sheet .o_horizontal_separator {
+    color: var(--t-primary, #0f4c5c); font-weight: 800; text-transform: none; font-size: 1rem; border-bottom: 2px solid var(--t-accent, #e8a33d); display: inline-block; padding-bottom: 2px;
+}
+
+/* Pestanas como pildoras */
+.o_notebook .nav-tabs { border-bottom: 1px solid #e3e9ec; gap: 4px; }
+.o_notebook .nav-tabs .nav-link { border: 0; border-radius: 10px 10px 0 0; color: #5a6b73; font-weight: 600; padding: 0.55rem 1rem; }
+.o_notebook .nav-tabs .nav-link:hover { background: #eef7f8; color: var(--t-primary, #0f4c5c); }
+.o_notebook .nav-tabs .nav-link.active { background: #ffffff; color: var(--t-primary, #0f4c5c); }
+
+/* Barra de estados */
+.o_form_statusbar { padding-top: 6px; padding-bottom: 6px; }
+.o_statusbar_status .o_arrow_button { font-weight: 600; }
+
+/* Listas */
+.o_list_view .o_list_table { background: #ffffff; }
+.o_list_view .o_list_table tbody tr:nth-child(even) { background-color: #fafcfd; }
+.o_list_view .o_list_table tfoot td { background: #eef3f5; font-weight: 700; }
+.o_list_view .o_list_button_add, .o_list_view .o_form_button_save { font-weight: 700; }
+.o_list_renderer { border-radius: 14px; }
+
+/* Busqueda y paneles de control */
+.o_searchview { border: 1px solid #d3dce1; background: #ffffff; }
+.o_searchview:focus-within { border-color: var(--t-primary, #0f4c5c); box-shadow: 0 0 0 3px var(--t-ring, rgba(15, 76, 92, 0.14)); }
+.o_control_panel .breadcrumb-item a { color: var(--t-primary, #0f4c5c); font-weight: 600; }
+.o_cp_buttons .btn { white-space: nowrap; }
+
+/* Menus desplegables, tooltips y popovers */
+.dropdown-menu { border: 0; border-radius: 12px; box-shadow: 0 12px 34px rgba(20, 40, 50, 0.18); padding: 6px; }
+.dropdown-menu .dropdown-item { border-radius: 8px; padding: 0.45rem 0.8rem; }
+.dropdown-menu .dropdown-item:hover, .dropdown-menu .dropdown-item:focus { background: #eef7f8; color: var(--t-primary, #0f4c5c); }
+.o_popover { border: 0; border-radius: 12px; box-shadow: 0 12px 34px rgba(20, 40, 50, 0.18); }
+
+/* Barras de desplazamiento finas */
+* { scrollbar-width: thin; scrollbar-color: #c3cfd5 transparent; }
+::-webkit-scrollbar { width: 8px; height: 8px; }
+::-webkit-scrollbar-thumb { background: #c3cfd5; border-radius: 8px; }
+::-webkit-scrollbar-thumb:hover { background: #9fb1ba; }
+
+/* Entrada suave de cada pantalla (solo opacidad, no afecta a elementos fijos) */
+.o_action_manager > .o_action { animation: tallerFadeIn 0.22s ease both; }
+@keyframes tallerFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+    .o_action_manager > .o_action { animation: none; }
+}
+
+/* ===== Temas de color (variables) ===== */
+html.o_taller_theme_blue { --t-primary: #1f4e8c; --t-primary-dark: #173b6a; --t-accent: #f0a030; --t-ring: rgba(31, 78, 140, 0.18); }
+html.o_taller_theme_green { --t-primary: #1f6b43; --t-primary-dark: #164f32; --t-accent: #e8a33d; --t-ring: rgba(31, 107, 67, 0.18); }
+html.o_taller_theme_violet { --t-primary: #5b3fd1; --t-primary-dark: #4630a8; --t-accent: #f0b429; --t-ring: rgba(91, 63, 209, 0.18); }
+
+/* ===== Avatares e iconos de equipo ===== */
+.t-avatar {
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    width: 36px; height: 36px; border-radius: 50%; color: #ffffff; font-weight: 800; font-size: 14px;
+    text-transform: uppercase; letter-spacing: 0.02em;
+}
+.t-avatar-lg { width: 52px; height: 52px; font-size: 19px; }
+.t-device-icon {
+    display: inline-flex; align-items: center; justify-content: center; flex: none;
+    width: 34px; height: 34px; border-radius: 10px; background: #e3eef1; color: var(--t-primary, #0f4c5c); font-size: 17px;
+}
+
+/* ===== Estados vacios ===== */
+.t-empty {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px;
+    padding: 30px 16px; text-align: center; color: #6b7a82;
+}
+.t-empty > i {
+    width: 64px; height: 64px; border-radius: 50%; background: #e3eef1; color: var(--t-primary, #0f4c5c);
+    display: flex; align-items: center; justify-content: center; font-size: 26px;
+}
+.t-empty b { color: #1b2a30; font-size: 15px; }
+.t-empty button {
+    border: 0; background: var(--t-primary, #0f4c5c); color: #ffffff; border-radius: 10px; padding: 8px 16px; font-weight: 700; cursor: pointer; margin-top: 4px;
+}
+.t-empty button:hover { background: var(--t-primary-dark, #0c3d4a); }
+
+/* ===== Esqueletos de carga ===== */
+.t-skel { padding: 18px 20px; }
+.t-skel-line, .t-skel-card {
+    border-radius: 12px; background: linear-gradient(90deg, #e6ecef 25%, #f3f6f8 45%, #e6ecef 65%);
+    background-size: 220% 100%; animation: tSkel 1.2s ease-in-out infinite;
+}
+.t-skel-line { height: 16px; margin-bottom: 12px; }
+.t-skel-line.w30 { width: 30%; height: 28px; }
+.t-skel-line.w60 { width: 60%; }
+.t-skel-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin: 14px 0; }
+.t-skel-card { height: 84px; }
+.t-skel-card.tall { height: 220px; }
+@keyframes tSkel { from { background-position: 100% 0; } to { background-position: -100% 0; } }
+@media (prefers-reduced-motion: reduce) { .t-skel-line, .t-skel-card { animation: none; } }
+
+/* ===== Pildoras de estado en el buscador ===== */
+.ts-pill { border-radius: 999px; padding: 1px 9px; font-size: 11px; font-weight: 700; background: #e3eef1; color: #0f4c5c; margin-left: 6px; }
+.ts-pill-diagnosing { background: #e1ecfb; color: #2a5db0; }
+.ts-pill-quote { background: #fbefd9; color: #9a6a12; }
+.ts-pill-repairing { background: #ebe6fd; color: #5b3fd1; }
+.ts-pill-done, .ts-pill-delivered { background: #dff3e8; color: #1f6b43; }
+.ts-pill-cancel { background: #f7e0e0; color: #a33; }

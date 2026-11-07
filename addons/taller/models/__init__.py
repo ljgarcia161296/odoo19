@@ -12,3 +12,10 @@ from . import dashboard
 from . import live
 from . import counter
 from . import tv
+from . import search
+from . import ficha
+from . import extras_ui
+from . import finanzas
+from . import mostrador
+from . import pantallas
+from . import gestion
