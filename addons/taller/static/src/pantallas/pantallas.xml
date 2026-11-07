@@ -1,0 +1,285 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Calendario">
+        <div class="o_tx">
+            <div class="tx-wrap">
+                <div class="tx-head">
+                    <div class="tx-title"><i class="fa fa-calendar"/> Entregas prometidas</div>
+                    <div class="tx-nav">
+                        <button class="tx-btn" t-on-click="() => this.shift(-1)"><i class="fa fa-chevron-left"/></button>
+                        <b class="tx-month"><t t-out="state.data ? state.data.title : ''"/></b>
+                        <button class="tx-btn" t-on-click="() => this.shift(1)"><i class="fa fa-chevron-right"/></button>
+                        <button class="tx-btn" t-on-click="today">Hoy</button>
+                    </div>
+                </div>
+                <div t-if="state.loading" class="t-skel"><div class="t-skel-card"/></div>
+                <div t-else="" class="tx-panel">
+                    <div class="tx-hint">Arrastrá una orden a otro día para reprogramar la entrega. <t t-out="state.data.total"/> órdenes este mes.</div>
+                    <div class="tx-grid">
+                        <div t-foreach="weekdays" t-as="w" t-key="w" class="tx-wd"><t t-out="w"/></div>
+                        <t t-foreach="state.data.cells" t-as="c" t-key="c.key">
+                            <div t-if="c.empty" class="tx-cell tx-cell-empty"/>
+                            <div t-else="" class="tx-cell" t-att-class="{'tx-today': c.today, 'tx-over': state.over === c.iso}"
+                                 t-on-dragover="(ev) => this.onDragOver(ev, c)" t-on-drop="(ev) => this.onDrop(ev, c)">
+                                <div class="tx-day"><t t-out="c.day"/></div>
+                                <div t-foreach="c.items" t-as="it" t-key="it.id" class="tx-chip" t-att-class="'tx-st-' + it.status + (it.late ? ' tx-late' : '')"
+                                     t-att-draggable="it.movable ? 'true' : 'false'" t-att-title="it.customer + ' · ' + it.device + ' · ' + it.status_label"
+                                     t-on-dragstart="(ev) => this.onDragStart(ev, it)" t-on-dragend="onDragEnd" t-on-click="() => this.open(it)">
+                                    <b><t t-out="it.name"/></b> <span><t t-out="it.customer"/></span>
+                                </div>
+                            </div>
+                        </t>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="taller.Compras">
+        <div class="o_tx">
+            <div class="tx-wrap">
+                <div class="tx-head">
+                    <div class="tx-title"><i class="fa fa-truck"/> Compras a proveedores</div>
+                    <button class="tx-btn tx-primary" t-on-click="newPurchase"><i class="fa fa-plus"/> Nueva compra</button>
+                </div>
+                <div t-if="state.error" class="t-empty"><i class="fa fa-lock"/><b t-out="state.error"/></div>
+                <t t-elif="state.loading"><div class="t-skel"><div class="t-skel-card"/></div></t>
+                <t t-else="">
+                    <div class="tx-tabs">
+                        <button t-foreach="[['all','Todas'],['draft','Borrador'],['ordered','Pedidas'],['received','Recibidas'],['cancel','Canceladas']]" t-as="t" t-key="t[0]"
+                                t-att-class="{'on': state.filter === t[0]}" t-on-click="() => state.filter = t[0]"><t t-out="t[1]"/></button>
+                    </div>
+                    <div t-if="!rows.length" class="t-empty"><i class="fa fa-truck"/><b>No hay compras en esta vista</b></div>
+                    <div class="tx-list">
+                        <div t-foreach="rows" t-as="r" t-key="r.id" class="tx-row">
+                            <div class="tx-row-main" t-on-click="() => this.openForm(r)">
+                                <div><b t-out="r.name"/> · <span t-out="r.supplier"/></div>
+                                <div class="tx-sub"><t t-out="r.date"/> · <t t-out="r.items"/></div>
+                            </div>
+                            <span class="tx-badge" t-att-class="'tx-b-' + r.state"><t t-out="r.state_label"/></span>
+                            <b class="tx-amount"><t t-out="money(r.total)"/></b>
+                            <div class="tx-acts">
+                                <button t-if="r.state === 'draft'" class="tx-btn" t-on-click="() => this.op(r, 'order')">Marcar pedida</button>
+                                <button t-if="r.state === 'ordered'" class="tx-btn tx-primary" t-on-click="() => this.op(r, 'receive')">Recibir</button>
+                                <button t-if="r.state === 'draft' || r.state === 'ordered'" class="tx-btn" t-on-click="() => this.op(r, 'cancel')">Cancelar</button>
+                                <button t-if="r.state === 'cancel'" class="tx-btn" t-on-click="() => this.op(r, 'draft')">Reabrir</button>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="taller.Garantias">
+        <div class="o_tx">
+            <div class="tx-wrap">
+                <div class="tx-head"><div class="tx-title"><i class="fa fa-shield"/> Garantías</div></div>
+                <t t-if="state.loading"><div class="t-skel"><div class="t-skel-card"/></div></t>
+                <t t-else="">
+                    <div class="tx-tabs">
+                        <button t-att-class="{'on': state.filter === 'all'}" t-on-click="() => state.filter = 'all'">Todas (<t t-out="state.rows.length"/>)</button>
+                        <button t-att-class="{'on': state.filter === 'soon'}" t-on-click="() => state.filter = 'soon'">Por vencer (<t t-out="count('soon')"/>)</button>
+                        <button t-att-class="{'on': state.filter === 'active'}" t-on-click="() => state.filter = 'active'">Vigentes (<t t-out="count('active')"/>)</button>
+                        <button t-att-class="{'on': state.filter === 'expired'}" t-on-click="() => state.filter = 'expired'">Vencidas (<t t-out="count('expired')"/>)</button>
+                    </div>
+                    <div t-if="!rows.length" class="t-empty"><i class="fa fa-shield"/><b>No hay garantías en esta vista</b><span>Aparecen las órdenes entregadas con días de garantía.</span></div>
+                    <div class="tx-list">
+                        <div t-foreach="rows" t-as="r" t-key="r.id" class="tx-row">
+                            <div class="tx-row-main" t-on-click="() => this.open(r)">
+                                <div><b t-out="r.name"/> · <span t-out="r.customer"/></div>
+                                <div class="tx-sub"><t t-out="r.device"/> · hasta <t t-out="r.end"/></div>
+                            </div>
+                            <span class="tx-badge" t-att-class="'tx-g-' + r.kind"><t t-out="label(r)"/></span>
+                            <div class="tx-acts">
+                                <button t-if="r.wa_url" class="tx-btn" t-on-click="() => this.wa(r)"><i class="fa fa-whatsapp"/> Avisar</button>
+                                <button t-if="r.kind !== 'expired'" class="tx-btn tx-primary" t-on-click="() => this.reentry(r)">Reingreso</button>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="taller.Config">
+        <div class="o_tx">
+            <div class="tx-wrap tx-narrow">
+                <div class="tx-head"><div class="tx-title"><i class="fa fa-cog"/> Configuración del taller</div></div>
+                <div t-if="state.error" class="t-empty"><i class="fa fa-lock"/><b t-out="state.error"/></div>
+                <t t-elif="state.loading"><div class="t-skel"><div class="t-skel-card"/></div></t>
+                <t t-else="">
+                    <div class="tx-panel">
+                        <div class="tx-sec">Datos del taller (aparecen en los PDF)</div>
+                        <div class="tx-logo">
+                            <img t-att-src="state.logo or state.f.logo_url" alt="Logo" t-if="state.logo or state.f.has_logo"/>
+                            <label class="tx-btn">Cambiar logo<input type="file" accept="image/*" class="d-none" t-on-change="pickLogo"/></label>
+                        </div>
+                        <div class="tx-form">
+                            <label class="tx-wide">Nombre<input type="text" t-model="state.f.name"/></label>
+                            <label>Teléfono<input type="text" t-model="state.f.phone"/></label>
+                            <label>Email<input type="text" t-model="state.f.email"/></label>
+                            <label>Dirección<input type="text" t-model="state.f.street"/></label>
+                            <label>Ciudad<input type="text" t-model="state.f.city"/></label>
+                            <label class="tx-wide">Sitio web<input type="text" t-model="state.f.website"/></label>
+                        </div>
+                    </div>
+                    <div class="tx-panel">
+                        <div class="tx-sec">Garantía y condiciones</div>
+                        <div class="tx-form">
+                            <label>Días de garantía por defecto
+                                <input type="number" min="0" max="3650" t-model.number="state.f.warranty_days"/>
+                            </label>
+                            <label class="tx-wide">Condiciones adicionales en el PDF de recepción
+                                <textarea rows="5" t-model="state.f.terms" placeholder="Texto que querés que figure en el comprobante (opcional)"/>
+                            </label>
+                        </div>
+                    </div>
+                    <div class="tx-panel">
+                        <div class="tx-sec">Consulta para clientes (kiosco)</div>
+                        <div class="tx-sub">Página pública donde el cliente ve el estado con su número de orden y los últimos 4 dígitos de su teléfono. Abrila en una tablet del mostrador o imprimí su QR.</div>
+                        <a class="tx-btn" t-att-href="'/taller/kiosco'" target="_blank" style="margin-top: 8px;"><i class="fa fa-external-link"/> Abrir kiosco</a>
+                    </div>
+                    <div class="tx-actions">
+                        <button class="tx-btn tx-primary" t-att-disabled="state.saving" t-on-click="save"><i class="fa fa-check"/> Guardar</button>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+    <t t-name="taller.Panel">
+        <div class="o_tx">
+            <div class="tx-wrap">
+                <div class="tx-head"><div class="tx-title"><i class="fa fa-area-chart"/> Panel de gestión</div></div>
+                <t t-if="state.loading"><div class="t-skel"><div class="t-skel-card"/></div></t>
+                <t t-else="">
+                    <div t-if="state.d.is_manager" class="tx-kpis">
+                        <div class="tx-kpi"><span>Cobrado este mes</span><b t-out="money(state.d.income_month)"/></div>
+                        <div class="tx-kpi"><span>Días promedio por reparación</span><b><t t-out="state.d.avg_days"/></b></div>
+                        <div class="tx-kpi"><span>Presupuestos aprobados (90 d)</span><b><t t-out="state.d.approval_rate"/>%</b></div>
+                        <div class="tx-kpi"><span>Satisfacción (<t t-out="state.d.ratings_count"/>)</span><b><t t-out="state.d.avg_rating or '—'"/> / 5</b></div>
+                    </div>
+
+                    <div t-if="state.d.is_manager" class="tx-panel">
+                        <div class="tx-sec">Meta del mes</div>
+                        <t t-if="state.goalEdit">
+                            <div class="tx-goal-edit">
+                                <input type="number" min="0" t-model.number="state.goalValue"/>
+                                <button class="tx-btn tx-primary" t-on-click="saveGoal">Guardar</button>
+                                <button class="tx-btn" t-on-click="() => state.goalEdit = false">Cancelar</button>
+                            </div>
+                        </t>
+                        <t t-else="">
+                            <div t-if="state.d.goal" class="tx-goal">
+                                <div class="tx-goal-bar"><span t-attf-style="width: #{state.d.goal_pct}%"/></div>
+                                <div class="tx-sub"><b><t t-out="state.d.goal_pct"/>%</b> · <t t-out="money(state.d.income_month)"/> de <t t-out="money(state.d.goal)"/></div>
+                            </div>
+                            <div t-else="" class="tx-sub">Todavía no definiste una meta mensual.</div>
+                            <button class="tx-btn" t-on-click="() => state.goalEdit = true"><t t-out="state.d.goal ? 'Cambiar meta' : 'Definir meta'"/></button>
+                        </t>
+                    </div>
+
+                    <div t-if="state.d.is_manager" class="tx-two">
+                        <div class="tx-panel">
+                            <div class="tx-sec">Ingresos (últimos 6 meses)</div>
+                            <div class="tx-bars">
+                                <div t-foreach="state.d.months" t-as="m" t-key="m_index" class="tx-bar" t-att-title="m.label + ': ' + money(m.income)">
+                                    <span class="tx-bar-val"><t t-out="money(m.income)"/></span>
+                                    <span class="tx-bar-fill" t-attf-style="height: #{barH(m)}px"/>
+                                    <span class="tx-bar-lab"><t t-out="m.label"/></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="tx-panel">
+                            <div class="tx-sec">Órdenes ingresadas por mes</div>
+                            <svg class="tx-line" viewBox="0 0 100 100" preserveAspectRatio="none">
+                                <polyline t-att-points="linePoints" fill="none" stroke="currentColor" stroke-width="2" vector-effect="non-scaling-stroke"/>
+                            </svg>
+                            <div class="tx-line-labels"><span t-foreach="state.d.months" t-as="m" t-key="m_index"><t t-out="m.label"/> <b><t t-out="m.orders"/></b></span></div>
+                        </div>
+                    </div>
+
+                    <div t-if="state.d.is_manager" class="tx-panel">
+                        <div class="tx-sec">Ranking de técnicos (entregas del mes)</div>
+                        <div t-if="!state.d.techs.length" class="tx-sub">Todavía no hay entregas este mes.</div>
+                        <div t-foreach="state.d.techs" t-as="t" t-key="t.name" class="tx-rank">
+                            <span class="tx-rank-pos"><t t-out="t_index + 1"/></span>
+                            <span class="tx-rank-name"><t t-out="t.name"/></span>
+                            <span class="tx-rank-bar"><span t-attf-style="width: #{techW(t)}%"/></span>
+                            <b><t t-out="t.count"/></b>
+                            <span class="tx-sub"><t t-out="money(t.amount)"/></span>
+                        </div>
+                    </div>
+
+                    <div class="tx-panel">
+                        <div class="tx-sec">Alertas</div>
+                        <div t-if="!state.d.alerts.length" class="t-empty"><i class="fa fa-check-circle"/><b>Todo en orden</b><span>No hay nada que requiera atención.</span></div>
+                        <div t-foreach="state.d.alerts" t-as="a" t-key="a_index" t-attf-class="tx-alert tx-al-#{a.kind}" t-on-click="() => this.openAlert(a)">
+                            <i t-attf-class="fa #{a.icon}"/>
+                            <div><div><t t-out="a.text"/></div><div class="tx-sub" t-if="a.sub"><t t-out="a.sub"/></div></div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="taller.Mensajes">
+        <div class="o_tx">
+            <div class="tx-wrap">
+                <div class="tx-head"><div class="tx-title"><i class="fa fa-whatsapp"/> Mensajes pendientes</div></div>
+                <div class="tx-hint">Avisos a clientes listos para enviar con un clic. Al enviar queda registrado y no vuelve a aparecer.</div>
+                <t t-if="state.loading"><div class="t-skel"><div class="t-skel-card"/></div></t>
+                <t t-else="">
+                    <div class="tx-tabs">
+                        <button t-att-class="{'on': state.filter === 'all'}" t-on-click="() => state.filter = 'all'">Todos (<t t-out="state.rows.length"/>)</button>
+                        <button t-att-class="{'on': state.filter === 'draft'}" t-on-click="() => state.filter = 'draft'">Recibidos (<t t-out="count('draft')"/>)</button>
+                        <button t-att-class="{'on': state.filter === 'quote'}" t-on-click="() => state.filter = 'quote'">Presupuestos (<t t-out="count('quote')"/>)</button>
+                        <button t-att-class="{'on': state.filter === 'done'}" t-on-click="() => state.filter = 'done'">Para retirar (<t t-out="count('done')"/>)</button>
+                        <button t-att-class="{'on': state.filter === 'survey'}" t-on-click="() => state.filter = 'survey'">Posventa (<t t-out="count('survey')"/>)</button>
+                    </div>
+                    <div t-if="!rows.length" class="t-empty"><i class="fa fa-check-circle"/><b>No hay mensajes pendientes</b></div>
+                    <div class="tx-list">
+                        <div t-foreach="rows" t-as="r" t-key="r.id + r.kind" class="tx-row">
+                            <div class="tx-row-main" t-on-click="() => this.open(r)">
+                                <div><b t-out="r.name"/> · <span t-out="r.customer"/></div>
+                                <div class="tx-sub"><t t-out="r.device"/> · <t t-out="r.phone or 'sin teléfono'"/></div>
+                            </div>
+                            <span class="tx-badge"><t t-out="r.label"/></span>
+                            <div class="tx-acts">
+                                <button t-if="r.wa_url" class="tx-btn tx-primary" t-on-click="() => this.send(r)"><i class="fa fa-whatsapp"/> Enviar</button>
+                                <button class="tx-btn" t-on-click="() => this.skip(r)" title="Marcar como ya avisado sin enviar">Ya avisé</button>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+
+    <t t-name="taller.Actividad">
+        <div class="o_tx">
+            <div class="tx-wrap">
+                <div class="tx-head">
+                    <div class="tx-title"><i class="fa fa-history"/> Registro de actividad</div>
+                    <input class="tx-search" type="text" placeholder="Filtrar por orden, persona o texto..." t-model="state.q"/>
+                </div>
+                <div t-if="state.error" class="t-empty"><i class="fa fa-lock"/><b t-out="state.error"/></div>
+                <t t-elif="state.loading"><div class="t-skel"><div class="t-skel-card"/></div></t>
+                <t t-else="">
+                    <div t-if="!rows.length" class="t-empty"><i class="fa fa-history"/><b>Sin movimientos</b></div>
+                    <div class="tx-list">
+                        <div t-foreach="rows" t-as="r" t-key="r_index" class="tx-row" t-on-click="() => this.open(r)" style="cursor: pointer;">
+                            <div class="tx-row-main">
+                                <div><b t-out="r.order"/> · <span t-out="r.who"/></div>
+                                <div t-foreach="r.changes" t-as="c" t-key="c_index" class="tx-sub"><t t-out="c"/></div>
+                                <div t-if="r.text" class="tx-sub"><t t-out="r.text"/></div>
+                            </div>
+                            <span class="tx-sub"><t t-out="r.when"/></span>
+                        </div>
+                    </div>
+                </t>
+            </div>
+        </div>
+    </t>
+</templates>

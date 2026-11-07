@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Finanzas">
+        <div class="o_taller_finanzas">
+            <div t-if="!state.data" class="t-skel">
+                <div class="t-skel-line w30"/>
+                <div class="t-skel-line w60"/>
+                <div class="t-skel-cards"><div class="t-skel-card"/><div class="t-skel-card"/><div class="t-skel-card"/><div class="t-skel-card"/></div>
+                <div class="t-skel-card tall"/>
+            </div>
+                        <div t-if="state.data" class="tn-wrap">
+                <div class="tn-head">
+                    <div>
+                        <div class="tn-title">Finanzas</div>
+                        <div class="tn-sub">Resultado estimado del mes y comisiones de los técnicos.</div>
+                    </div>
+                    <div class="tn-tools">
+                        <button class="tn-btn" t-on-click="() => this.shiftMonth(-1)"><i class="fa fa-angle-left"/></button>
+                        <input type="month" t-att-value="state.month" t-on-change="onMonth"/>
+                        <button class="tn-btn" t-on-click="() => this.shiftMonth(1)"><i class="fa fa-angle-right"/></button>
+                        <button class="tn-btn" t-on-click="print"><i class="fa fa-print"/> Imprimir</button>
+                    </div>
+                </div>
+
+                <div class="tn-cards">
+                    <div class="tn-card">
+                        <span>Cobrado en el mes</span>
+                        <b><t t-out="money(state.data.income)"/></b>
+                    </div>
+                    <div class="tn-card">
+                        <span>Costo de repuestos</span>
+                        <b><t t-out="money(state.data.parts_cost)"/></b>
+                        <small><t t-out="state.data.delivered"/> órdenes entregadas</small>
+                    </div>
+                    <div class="tn-card">
+                        <span>Comisiones</span>
+                        <b><t t-out="money(state.data.commissions)"/></b>
+                    </div>
+                    <div class="tn-card">
+                        <span>Gastos fijos</span>
+                        <b><t t-out="money(state.data.expenses_total)"/></b>
+                    </div>
+                    <div t-attf-class="tn-card tn-result #{state.data.result >= 0 ? 'pos' : 'neg'}">
+                        <span>Resultado estimado</span>
+                        <b><t t-out="money(state.data.result)"/></b>
+                    </div>
+                </div>
+                <div class="tn-note">Resultado = cobrado − costo de repuestos de las órdenes entregadas − comisiones − gastos fijos. Es una estimación de caja, no un balance contable.</div>
+
+                <div class="tn-cols">
+                    <div class="tn-panel">
+                        <div class="tn-panel-title">Comisiones por técnico</div>
+                        <div class="tn-muted">Se calculan sobre la mano de obra de las órdenes entregadas este mes (sin las "sin cargo").</div>
+                        <div class="tn-trow tn-thead">
+                            <span>Técnico</span><span>Órdenes</span><span>Mano de obra</span><span>%</span><span>Comisión</span>
+                        </div>
+                        <div t-foreach="state.data.techs" t-as="t" t-key="t.id + '-' + t_index" class="tn-trow">
+                            <span><b><t t-out="t.name"/></b></span>
+                            <span><t t-out="t.orders"/></span>
+                            <span><t t-out="money(t.labor)"/></span>
+                            <span>
+                                <input t-if="t.id" type="number" min="0" max="100" step="0.5"
+                                       t-att-value="t.pct" t-on-change="(ev) => this.savePct(t, ev)"/>
+                                <t t-else="">—</t>
+                            </span>
+                            <span><b><t t-out="money(t.commission)"/></b></span>
+                        </div>
+                    </div>
+
+                    <div class="tn-panel">
+                        <div class="tn-panel-head">
+                            <div class="tn-panel-title">Gastos del mes</div>
+                            <button class="tn-btn tn-primary" t-on-click="newExpense"><i class="fa fa-plus"/> Cargar gasto</button>
+                        </div>
+                        <div t-if="!state.data.expenses.length" class="t-empty"><i class="fa fa-credit-card"/><b>No hay gastos cargados este mes</b><button t-on-click="newExpense">Cargar gasto</button></div>
+                        <div t-foreach="state.data.expenses" t-as="e" t-key="e.id" class="tn-erow" t-on-click="() => this.openExpense(e)">
+                            <span><b><t t-out="e.name"/></b> <small class="tn-muted"><t t-out="e.category"/></small></span>
+                            <span t-if="e.recurring" class="tn-tag">Mensual</span>
+                            <b><t t-out="money(e.amount)"/></b>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

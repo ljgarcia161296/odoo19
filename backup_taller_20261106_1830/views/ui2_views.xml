@@ -1,0 +1,91 @@
+<odoo>
+    <!-- ============ Calendario de entregas prometidas ============ -->
+    <record id="view_service_order_calendar" model="ir.ui.view">
+        <field name="name">service.order.calendar</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <calendar string="Entregas prometidas" date_start="promise_date" color="status"
+                      mode="month" quick_create="0">
+                <field name="name"/>
+                <field name="customer_name"/>
+                <field name="status"/>
+            </calendar>
+        </field>
+    </record>
+
+    <record id="action_taller_calendar" model="ir.actions.act_window">
+        <field name="name">Calendario de entregas</field>
+        <field name="res_model">service.order</field>
+        <field name="view_mode">calendar,list,form</field>
+        <field name="domain">[('promise_date', '!=', False), ('status', 'not in', ['delivered', 'cancel'])]</field>
+    </record>
+
+    <!-- ============ Tablero para la pantalla del taller ============ -->
+    <record id="action_taller_tv" model="ir.actions.client">
+        <field name="name">Tablero del taller</field>
+        <field name="tag">taller.tv</field>
+    </record>
+
+    <menuitem id="menu_taller_calendar" name="Calendario" parent="menu_taller_root"
+              action="action_taller_calendar" sequence="4"/>
+    <menuitem id="menu_taller_tv" name="Tablero para TV" parent="menu_taller_reports"
+              action="action_taller_tv" sequence="5"/>
+
+    <!-- ============ Listas con colores ============ -->
+    <record id="view_service_order_tree_colors" model="ir.ui.view">
+        <field name="name">service.order.tree.colors</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_tree"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='status']" position="attributes">
+                <attribute name="decoration-info">status == 'diagnosing'</attribute>
+                <attribute name="decoration-warning">status == 'quote'</attribute>
+                <attribute name="decoration-success">status in ['done', 'delivered']</attribute>
+                <attribute name="decoration-danger">status == 'cancel'</attribute>
+            </xpath>
+            <xpath expr="//field[@name='balance']" position="attributes">
+                <attribute name="decoration-danger">balance &gt; 0 and status in ['done', 'delivered']</attribute>
+                <attribute name="decoration-bf">balance &gt; 0</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_purchase_tree_colors" model="ir.ui.view">
+        <field name="name">service.purchase.tree.colors</field>
+        <field name="model">service.purchase</field>
+        <field name="inherit_id" ref="view_service_purchase_tree"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='state']" position="attributes">
+                <attribute name="decoration-info">state == 'ordered'</attribute>
+                <attribute name="decoration-success">state == 'received'</attribute>
+                <attribute name="decoration-danger">state == 'cancel'</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- ============ PDF con la marca del taller ============ -->
+    <template id="report_service_order_brand" inherit_id="report_service_order">
+        <xpath expr="//div[hasclass('page')]" position="inside">
+            <style>
+                .page h2 { color: #0f4c5c; border-bottom: 3px solid #e8a33d; padding-bottom: 6px; }
+                .page h5 { color: #0f4c5c; text-transform: uppercase; letter-spacing: 0.05em;
+                           font-size: 12px; margin-top: 18px; }
+                .page table.table thead th { background-color: #0f4c5c; color: #ffffff; border-color: #0f4c5c; }
+                .page table.table tbody tr:nth-child(even) { background-color: #f3f6f8; }
+                .page strong { color: #1b2a30; }
+            </style>
+        </xpath>
+    </template>
+
+    <template id="report_purchase_brand" inherit_id="report_purchase">
+        <xpath expr="//div[hasclass('page')]" position="inside">
+            <style>
+                .page h2 { color: #0f4c5c; border-bottom: 3px solid #e8a33d; padding-bottom: 6px; }
+                .page table.table thead th { background-color: #0f4c5c; color: #ffffff; border-color: #0f4c5c; }
+                .page table.table tbody tr:nth-child(even) { background-color: #f3f6f8; }
+            </style>
+        </xpath>
+    </template>
+</odoo>

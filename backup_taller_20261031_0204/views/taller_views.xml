@@ -1,0 +1,152 @@
+<odoo>
+    <record id="view_service_order_form" model="ir.ui.view">
+        <field name="name">service.order.form</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <form string="Orden de Servicio">
+                <header>
+                    <button name="action_start_diagnosis" string="Iniciar diagnóstico" type="object"
+                            class="btn-primary" invisible="status != 'draft'"/>
+                    <button name="action_start_repair" string="Iniciar reparación" type="object"
+                            class="btn-primary" invisible="status != 'diagnosing'"/>
+                    <button name="action_done" string="Marcar listo" type="object"
+                            class="btn-primary" invisible="status != 'repairing'"/>
+                    <button name="action_deliver" string="Entregar" type="object"
+                            class="btn-primary" invisible="status != 'done'"/>
+                    <button name="action_cancel" string="Cancelar" type="object"
+                            invisible="status in ['delivered', 'cancel']"/>
+                    <button name="action_reset_draft" string="Volver a recibido" type="object"
+                            invisible="status != 'cancel'"/>
+                    <button name="%(action_report_service_order)d" string="Imprimir" type="action"/>
+                    <field name="status" widget="statusbar"
+                           statusbar_visible="draft,diagnosing,repairing,done,delivered"/>
+                </header>
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="customer_name"/>
+                            <field name="device_type"/>
+                            <field name="user_id"/>
+                        </group>
+                        <group>
+                            <field name="date_received"/>
+                            <field name="date_finished"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                    </group>
+                    <notebook>
+                        <page string="Equipo">
+                            <group>
+                                <group>
+                                    <field name="device_brand"/>
+                                    <field name="device_model"/>
+                                    <field name="serial_number"/>
+                                </group>
+                                <group>
+                                    <field name="accessories"/>
+                                </group>
+                            </group>
+                            <separator string="Estado físico al ingreso"/>
+                            <field name="physical_condition" placeholder="Rayones, golpes, pantalla rota, etc."/>
+                        </page>
+                        <page string="Problema">
+                            <field name="issue_description" placeholder="Describe el problema del equipo..."/>
+                        </page>
+                        <page string="Repuestos y costos">
+                            <field name="line_ids">
+                                <list editable="bottom">
+                                    <field name="name"/>
+                                    <field name="quantity"/>
+                                    <field name="unit_price"/>
+                                    <field name="currency_id" invisible="1"/>
+                                    <field name="subtotal"/>
+                                </list>
+                            </field>
+                            <group class="oe_subtotal_footer oe_right">
+                                <field name="parts_total"/>
+                                <field name="labor_cost"/>
+                                <field name="total" class="oe_subtotal_footer_separator"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_service_order_tree" model="ir.ui.view">
+        <field name="name">service.order.tree</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <list string="Órdenes de Servicio"
+                  decoration-success="status in ('done', 'delivered')"
+                  decoration-muted="status == 'cancel'">
+                <field name="name"/>
+                <field name="customer_name"/>
+                <field name="device_type"/>
+                <field name="user_id"/>
+                <field name="status" widget="badge"/>
+                <field name="date_received"/>
+                <field name="currency_id" invisible="1"/>
+                <field name="total" sum="Total"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_service_order_kanban" model="ir.ui.view">
+        <field name="name">service.order.kanban</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <kanban default_group_by="status" quick_create="false">
+                <field name="currency_id"/>
+                <templates>
+                    <t t-name="card">
+                        <div class="oe_kanban_global_click">
+                            <strong><field name="name"/></strong>
+                            <div><field name="customer_name"/></div>
+                            <div class="text-muted"><field name="device_type"/> <field name="device_brand"/> <field name="device_model"/></div>
+                            <div><field name="total" widget="monetary"/></div>
+                        </div>
+                    </t>
+                </templates>
+            </kanban>
+        </field>
+    </record>
+
+    <record id="view_service_order_search" model="ir.ui.view">
+        <field name="name">service.order.search</field>
+        <field name="model">service.order</field>
+        <field name="arch" type="xml">
+            <search string="Órdenes de Servicio">
+                <field name="name" string="Orden"/>
+                <field name="serial_number"/>
+                <field name="device_model"/>
+                <field name="customer_name"/>
+                <field name="user_id"/>
+                <filter name="f_open" string="En proceso"
+                        domain="[('status', 'in', ['draft', 'diagnosing', 'quote', 'repairing'])]"/>
+                <filter name="f_done" string="Listas para entregar" domain="[('status', '=', 'done')]"/>
+                <filter name="f_mine" string="Mis órdenes" domain="[('user_id', '=', uid)]"/>
+                <group>
+                    <filter name="g_status" string="Estado" context="{'group_by': 'status'}"/>
+                    <filter name="g_device" string="Tipo de equipo" context="{'group_by': 'device_type'}"/>
+                    <filter name="g_user" string="Técnico" context="{'group_by': 'user_id'}"/>
+                </group>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_service_order" model="ir.actions.act_window">
+        <field name="name">Órdenes de Servicio</field>
+        <field name="res_model">service.order</field>
+        <field name="view_mode">kanban,list,form</field>
+    </record>
+
+    <menuitem id="menu_taller_root" name="Taller" groups="group_taller_technician"/>
+    <menuitem id="menu_service_order" name="Órdenes de Servicio" parent="menu_taller_root"
+              action="action_service_order"/>
+</odoo>

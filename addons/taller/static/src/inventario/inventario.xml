@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Inventario">
+        <div class="o_taller_inventario">
+            <div class="ti-head">
+                <div>
+                    <div class="ti-title">Inventario</div>
+                    <div class="ti-sub">Ajustá el stock con un toque y pedí lo que falta.</div>
+                </div>
+                <div class="ti-tools">
+                    <div class="ti-search">
+                        <i class="fa fa-search"/>
+                        <input type="text" placeholder="Buscar repuesto o código..." t-att-value="state.search" t-on-input="onSearch"/>
+                    </div>
+                    <button t-attf-class="ti-chip #{state.onlyLow ? 'on' : ''}" t-on-click="toggleLow">
+                        <i class="fa fa-exclamation-triangle"/> Stock bajo
+                    </button>
+                    <button t-if="state.data.is_manager" class="ti-btn" t-on-click="() => this.state.adding = !this.state.adding">
+                        <i class="fa fa-plus"/> Nuevo repuesto
+                    </button>
+                </div>
+            </div>
+
+            <div class="ti-cards">
+                <div class="ti-card"><span>Repuestos</span><b><t t-out="state.data.count"/></b></div>
+                <div t-attf-class="ti-card #{state.data.low ? 'warn' : ''}"><span>Con stock bajo</span><b><t t-out="state.data.low"/></b></div>
+                <div t-if="state.data.is_manager" class="ti-card"><span>Valor del inventario</span><b><t t-out="money(state.data.value)"/></b></div>
+            </div>
+
+            <div t-if="state.adding" class="ti-panel">
+                <div class="ti-label">Nuevo repuesto</div>
+                <div class="ti-form">
+                    <input type="text" placeholder="Nombre" t-model="state.form.name"/>
+                    <input type="text" placeholder="Código" t-model="state.form.code"/>
+                    <input type="number" min="0" placeholder="Costo" t-model="state.form.cost"/>
+                    <input type="number" min="0" placeholder="Precio de venta" t-model="state.form.price"/>
+                    <input type="number" min="0" placeholder="Stock mínimo" t-model="state.form.min_stock"/>
+                    <input type="number" min="0" placeholder="Stock inicial" t-model="state.form.stock"/>
+                    <button class="ti-btn ti-primary" t-on-click="createPart">Guardar</button>
+                </div>
+            </div>
+
+            <div t-if="state.data.is_manager and (state.data.low or selectedIds.length)" class="ti-bar">
+                <span t-if="selectedIds.length"><t t-out="selectedIds.length"/> seleccionados</span>
+                <button t-if="selectedIds.length" class="ti-btn ti-primary" t-on-click="() => this.makePurchase(false)">
+                    <i class="fa fa-shopping-cart"/> Pedir seleccionados
+                </button>
+                <button class="ti-btn" t-on-click="() => this.makePurchase(true)">
+                    <i class="fa fa-magic"/> Sugerir pedido de todo lo bajo
+                </button>
+            </div>
+
+            <div class="ti-panel">
+                <div class="ti-row ti-thead">
+                    <span></span>
+                    <span>Repuesto</span><span>Stock</span><span>Mínimo</span><span>Precio</span><span>Ajustar</span>
+                </div>
+                <div t-if="!state.data.parts.length" class="t-empty"><i class="fa fa-cubes"/><b>No hay repuestos para mostrar</b><button t-if="state.data.is_manager" t-on-click="() => this.state.adding = true">Nuevo repuesto</button></div>
+                <div t-foreach="state.data.parts" t-as="p" t-key="p.id" t-attf-class="ti-row #{p.low ? 'low' : ''}">
+                    <span>
+                        <input t-if="state.data.is_manager" type="checkbox" t-att-checked="state.selected[p.id]"
+                               t-on-change="() => this.toggleSel(p)"/>
+                    </span>
+                    <span class="ti-name" t-on-click="() => this.openPart(p)">
+                        <b><t t-out="p.name"/></b>
+                        <small class="ti-muted"><t t-out="p.code"/></small>
+                        <small t-if="p.incoming" class="ti-incoming">+<t t-out="p.incoming"/> en camino</small>
+                    </span>
+                    <span><b t-attf-class="ti-stock #{p.low ? 'low' : ''}"><t t-out="p.stock"/></b></span>
+                    <span>
+                        <input t-if="state.data.is_manager" type="number" min="0" t-att-value="p.min"
+                               t-on-change="(ev) => this.saveField(p, 'min_stock', ev)"/>
+                        <t t-else=""><t t-out="p.min"/></t>
+                    </span>
+                    <span>
+                        <input t-if="state.data.is_manager" type="number" min="0" t-att-value="p.price"
+                               t-on-change="(ev) => this.saveField(p, 'price', ev)"/>
+                        <t t-else=""><t t-out="money(p.price)"/></t>
+                    </span>
+                    <span class="ti-adj">
+                        <button class="ti-round" t-on-click="() => this.adjust(p, -1)">−</button>
+                        <button class="ti-round" t-on-click="() => this.adjust(p, 1)">+</button>
+                        <button class="ti-round ti-more" title="Ajustar cantidad" t-on-click="() => this.adjustPrompt(p)">…</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

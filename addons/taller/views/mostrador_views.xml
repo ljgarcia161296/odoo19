@@ -1,0 +1,25 @@
+<odoo>
+    <record id="action_taller_venta" model="ir.actions.client">
+        <field name="name">Venta de mostrador</field>
+        <field name="tag">taller.venta</field>
+    </record>
+    <record id="action_taller_inventario_ui" model="ir.actions.client">
+        <field name="name">Inventario ágil</field>
+        <field name="tag">taller.inventario</field>
+    </record>
+    <record id="action_taller_clientes_ui" model="ir.actions.client">
+        <field name="name">Clientes</field>
+        <field name="tag">taller.clientes</field>
+    </record>
+
+    <menuitem id="menu_taller_venta" name="Venta de mostrador" parent="menu_taller_root"
+              action="action_taller_venta" sequence="4"/>
+    <menuitem id="menu_taller_inventario_ui" name="Inventario ágil" parent="menu_taller_inventory"
+              action="action_taller_inventario_ui" sequence="1"/>
+
+    <!-- El menú Clientes abre la ficha de clientes; la lista clásica queda en Configuración -->
+    <menuitem id="menu_taller_clientes" name="Clientes" parent="menu_taller_root"
+              action="action_taller_clientes_ui" sequence="20"/>
+    <menuitem id="menu_taller_clientes_classic" name="Clientes (lista clásica)" parent="menu_taller_config"
+              action="action_taller_clientes" sequence="31"/>
+</odoo>

@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Tech">
+        <div class="o_taller_tech">
+            <div class="tt-head">
+                <div>
+                    <div class="tt-title">Mi trabajo</div>
+                    <div class="tt-sub">Toca una orden para ver el detalle y avanzar su estado.</div>
+                </div>
+                <button t-if="state.isManager" t-attf-class="tt-chip #{state.mine ? 'on' : ''}" t-on-click="toggleMine">
+                    <i class="fa fa-user"/> Solo las mías
+                </button>
+            </div>
+
+            <div class="tt-tabs">
+                <button t-foreach="tabs" t-as="tab" t-key="tab.key"
+                        t-attf-class="tt-tab #{state.mode === tab.key ? 'on' : ''}"
+                        t-on-click="() => this.setMode(tab.key)">
+                    <t t-out="tab.label"/>
+                    <span t-if="tabCount(tab.key) !== ''" class="tt-count"><t t-out="tabCount(tab.key)"/></span>
+                </button>
+            </div>
+
+            <div t-if="!state.data.orders.length" class="tt-empty">
+                <i class="fa fa-smile-o"/>
+                <div>No hay órdenes en esta lista.</div>
+            </div>
+
+            <div class="tt-list">
+                <div t-foreach="state.data.orders" t-as="o" t-key="o.id"
+                     t-attf-class="tt-card tt-st-#{o.status}"
+                     t-attf-style="animation-delay: #{o_index * 40}ms"
+                     t-on-click="() => this.openDetail(o)">
+                    <div class="tt-row">
+                        <b class="tt-name"><t t-out="o.name"/></b>
+                        <span t-attf-class="tt-pill tt-pill-#{o.status}"><t t-out="o.status_label"/></span>
+                    </div>
+                    <div class="tt-customer"><t t-out="o.customer"/></div>
+                    <div class="tt-device">
+                        <i t-attf-class="fa #{o.device_type === 'phone' ? 'fa-mobile' : (o.device_type === 'tablet' ? 'fa-tablet' : 'fa-laptop')}"/>
+                        <t t-out="o.device"/>
+                    </div>
+                    <div t-if="o.problem" class="tt-problem"><t t-out="o.problem"/></div>
+                    <div class="tt-row tt-foot">
+                        <span t-if="o.promise" t-attf-class="#{o.late ? 'tt-late' : ''}">
+                            <i class="fa fa-calendar"/> <t t-out="o.promise"/>
+                            <t t-if="o.late"> · atrasada</t>
+                        </span>
+                        <span t-else=""/>
+                        <b><t t-out="money(o.total)"/></b>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Detalle ===== -->
+            <div t-if="state.detail" class="tt-overlay" t-on-click="closeDetail"/>
+            <div t-if="state.detail" class="tt-sheet">
+                <div class="tt-sheet-head">
+                    <div>
+                        <div class="tt-sheet-title"><t t-out="state.detail.name"/></div>
+                        <div class="tt-muted"><t t-out="state.detail.customer"/></div>
+                    </div>
+                    <button class="tt-x" t-on-click="closeDetail">×</button>
+                </div>
+
+                <div class="tt-contact" t-if="state.detail.tel">
+                    <a class="tt-btn" t-att-href="state.detail.tel"><i class="fa fa-phone"/> Llamar</a>
+                    <a class="tt-btn" t-att-href="state.detail.wa_url" target="_blank"><i class="fa fa-whatsapp"/> WhatsApp</a>
+                </div>
+
+                <div class="tt-block">
+                    <div class="tt-line"><span class="tt-muted">Estado</span>
+                        <span t-attf-class="tt-pill tt-pill-#{state.detail.status}"><t t-out="state.detail.status_label"/></span></div>
+                    <div class="tt-line"><span class="tt-muted">Equipo</span><b><t t-out="state.detail.device or '—'"/></b></div>
+                    <div class="tt-line" t-if="state.detail.serial"><span class="tt-muted">Serie / IMEI</span><b><t t-out="state.detail.serial"/></b></div>
+                    <div class="tt-line" t-if="state.detail.accessories"><span class="tt-muted">Accesorios</span><b><t t-out="state.detail.accessories"/></b></div>
+                </div>
+
+                <div class="tt-block" t-if="state.detail.problem">
+                    <div class="tt-label">Problema</div>
+                    <div><t t-out="state.detail.problem"/></div>
+                </div>
+                <div class="tt-block" t-if="state.detail.condition">
+                    <div class="tt-label">Estado físico al ingreso</div>
+                    <div><t t-out="state.detail.condition"/></div>
+                </div>
+                <div class="tt-block" t-if="state.detail.failed_checks.length">
+                    <div class="tt-label">Fallas del checklist</div>
+                    <div t-foreach="state.detail.failed_checks" t-as="f" t-key="f_index" class="tt-fail">
+                        <i class="fa fa-times-circle"/> <t t-out="f"/>
+                    </div>
+                </div>
+
+                <div class="tt-actions" t-if="state.detail.actions.length">
+                    <button t-foreach="state.detail.actions" t-as="a" t-key="a.key"
+                            t-attf-class="tt-btn #{a.primary ? 'tt-primary' : ''}"
+                            t-att-disabled="state.busy" t-on-click="() => this.runAction(a.key)">
+                        <t t-out="a.label"/>
+                    </button>
+                </div>
+
+                <div class="tt-block">
+                    <div class="tt-label">Repuestos</div>
+                    <div t-if="!state.detail.lines.length" class="tt-muted">Todavía no hay repuestos cargados.</div>
+                    <div t-foreach="state.detail.lines" t-as="l" t-key="l.id" class="tt-line">
+                        <span><t t-out="l.name"/> <span class="tt-muted">× <t t-out="l.qty"/></span></span>
+                        <span>
+                            <b><t t-out="money(l.subtotal, state.detail.symbol)"/></b>
+                            <button t-if="state.detail.editable" class="tt-mini" t-on-click="() => this.removeLine(l)">×</button>
+                        </span>
+                    </div>
+
+                    <t t-if="state.detail.editable">
+                        <div class="tt-add">
+                            <input class="tt-input" type="text" placeholder="Buscar repuesto por nombre o código"
+                                   t-att-value="state.partQuery" t-on-input="onPartQuery"/>
+                            <input class="tt-input tt-qty" type="number" min="1" step="1" t-model.number="state.qty"/>
+                        </div>
+                        <div t-foreach="state.parts" t-as="p" t-key="p.id" class="tt-part" t-on-click="() => this.addPart(p)">
+                            <span><t t-out="p.name"/></span>
+                            <span class="tt-muted">Stock <t t-out="p.stock"/> · <t t-out="money(p.price, state.detail.symbol)"/></span>
+                        </div>
+
+                        <div class="tt-add">
+                            <input class="tt-input" type="number" min="0" placeholder="Mano de obra" t-model="state.labor"/>
+                            <button class="tt-btn" t-on-click="saveLabor">Guardar</button>
+                        </div>
+                    </t>
+                </div>
+
+                <div class="tt-block tt-totals">
+                    <div class="tt-line"><span>Total</span><b><t t-out="money(state.detail.total, state.detail.symbol)"/></b></div>
+                    <div class="tt-line"><span class="tt-muted">Pagado</span><span><t t-out="money(state.detail.paid, state.detail.symbol)"/></span></div>
+                    <div class="tt-line"><span class="tt-muted">Saldo</span><b><t t-out="money(state.detail.balance, state.detail.symbol)"/></b></div>
+                </div>
+
+                <button class="tt-btn tt-full" t-on-click="openForm"><i class="fa fa-external-link"/> Abrir la ficha completa</button>
+            </div>
+        </div>
+    </t>
+</templates>

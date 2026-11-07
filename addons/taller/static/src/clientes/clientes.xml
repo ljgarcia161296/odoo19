@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Clientes">
+        <div class="o_taller_clientes">
+            <!-- ===== Formulario ===== -->
+            <div t-if="state.editing" class="tl-wrap">
+                <div class="tl-panel tl-edit">
+                    <div class="tl-title tl-edit-title"><t t-out="state.partnerId ? 'Editar cliente' : 'Nuevo cliente'"/></div>
+                    <div class="tl-form">
+                        <label class="tl-wide">Nombre
+                            <input type="text" t-model="state.form.name" placeholder="Nombre y apellido"/>
+                        </label>
+                        <label>Teléfono / celular
+                            <input type="text" t-model="state.form.phone" placeholder="099 123 456"/>
+                        </label>
+                        <label>Email
+                            <input type="text" t-model="state.form.email" placeholder="correo@ejemplo.com"/>
+                        </label>
+                        <label>Dirección
+                            <input type="text" t-model="state.form.street"/>
+                        </label>
+                        <label>Ciudad
+                            <input type="text" t-model="state.form.city"/>
+                        </label>
+                        <label>Documento (CI o RUT)
+                            <input type="text" t-model="state.form.vat"/>
+                        </label>
+                        <label class="tl-wide">Notas internas
+                            <textarea t-model="state.form.comment" rows="3" placeholder="Preferencias, avisos, cómo contactarlo..."/>
+                        </label>
+                    </div>
+                    <div class="tl-form-actions">
+                        <button class="tl-btn" t-on-click="cancelEdit">Cancelar</button>
+                        <button class="tl-btn tl-primary" t-on-click="saveForm"><i class="fa fa-check"/> Guardar</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Lista ===== -->
+            <div t-elif="!state.detail" class="tl-wrap">
+                <div class="tl-head">
+                    <div>
+                        <div class="tl-title">Clientes</div>
+                        <div class="tl-sub">Buscá por nombre, teléfono o email.</div>
+                    </div>
+                    <div class="tl-tools">
+                        <div class="tl-search">
+                            <i class="fa fa-search"/>
+                            <input type="text" placeholder="Buscar cliente..." t-att-value="state.search" t-on-input="onSearch"/>
+                        </div>
+                        <button class="tl-btn tl-primary" t-on-click="newPartner"><i class="fa fa-plus"/> Nuevo cliente</button>
+                    </div>
+                </div>
+                <div class="tl-panel">
+                    <div class="tl-row tl-thead"><span>Cliente</span><span>Teléfono</span><span>Órdenes</span><span>Última visita</span><span>Saldo</span></div>
+                    <div t-if="!state.list.rows.length" class="t-empty"><i class="fa fa-users"/><b>No se encontraron clientes</b><span>Probá con otro nombre o teléfono.</span><button t-on-click="newPartner">Nuevo cliente</button></div>
+                    <div t-foreach="state.list.rows" t-as="r" t-key="r.id" class="tl-row tl-click" t-on-click="() => this.open(r)">
+                        <span class="tl-who"><span class="t-avatar" t-attf-style="background: #{avatarColor(r.name)}"><t t-out="initials(r.name)"/></span><b><t t-out="r.name"/></b></span>
+                        <span class="tl-muted"><t t-out="r.phone or '—'"/></span>
+                        <span><t t-out="r.orders"/></span>
+                        <span class="tl-muted"><t t-out="r.last or '—'"/></span>
+                        <span><b t-if="r.balance > 0" class="tl-owed"><t t-out="money(r.balance)"/></b><t t-else="">—</t></span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ===== Detalle ===== -->
+            <div t-else="" class="tl-wrap">
+                <t t-set="c" t-value="state.detail"/>
+                <div class="tl-head">
+                    <div class="tl-headleft">
+                        <button class="tl-back" t-on-click="back"><i class="fa fa-angle-left"/> Clientes</button>
+                        <div>
+                            <div class="tl-title tl-title-row"><span class="t-avatar t-avatar-lg" t-attf-style="background: #{avatarColor(c.name)}"><t t-out="initials(c.name)"/></span><t t-out="c.name"/></div>
+                            <div class="tl-sub">
+                                <t t-out="c.phone or 'Sin teléfono'"/>
+                                <t t-if="c.email"> · <t t-out="c.email"/></t>
+                                <t t-if="c.vat"> · <t t-out="c.vat"/></t>
+                                <t t-if="c.street"> · <t t-out="c.street"/></t>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tl-tools">
+                        <a t-if="c.tel" class="tl-btn" t-att-href="c.tel"><i class="fa fa-phone"/> Llamar</a>
+                        <button t-if="c.wa_url" class="tl-btn" t-on-click="() => this.openUrl(c.wa_url)"><i class="fa fa-whatsapp"/> WhatsApp</button>
+                        <button class="tl-btn" t-on-click="editPartner"><i class="fa fa-pencil"/> Editar</button>
+                        <button class="tl-btn tl-primary" t-on-click="newOrder"><i class="fa fa-plus"/> Nueva orden</button>
+                    </div>
+                </div>
+
+                <div class="tl-cards">
+                    <div class="tl-card"><span>Órdenes</span><b><t t-out="c.count"/></b></div>
+                    <div class="tl-card"><span>Facturado</span><b><t t-out="money(c.billed)"/></b></div>
+                    <div t-attf-class="tl-card #{c.balance > 0 ? 'owed' : ''}"><span>Saldo pendiente</span><b><t t-out="money(c.balance)"/></b></div>
+                </div>
+
+                <div t-if="c.comment" class="tl-panel tl-note">
+                    <div class="tl-label">Notas internas</div>
+                    <div><t t-out="c.comment"/></div>
+                </div>
+
+                <div class="tl-cols">
+                    <div class="tl-panel">
+                        <div class="tl-label">Equipos que trajo</div>
+                        <div t-if="!c.devices.length" class="t-empty"><i class="fa fa-laptop"/><b>Todavía no trajo equipos</b></div>
+                        <div t-foreach="c.devices" t-as="d" t-key="d_index" class="tl-dev">
+                            <span><b><t t-out="d.name"/></b> <small class="tl-muted"><t t-out="d.serial"/></small></span>
+                            <span class="tl-tag"><t t-out="d.count"/> <t t-out="d.count === 1 ? 'vez' : 'veces'"/></span>
+                        </div>
+                    </div>
+                    <div class="tl-panel">
+                        <div class="tl-label">Historial de órdenes</div>
+                        <div t-if="!c.orders.length" class="t-empty"><i class="fa fa-wrench"/><b>Sin órdenes</b><button t-on-click="newOrder">Nueva orden</button></div>
+                        <div t-foreach="c.orders" t-as="o" t-key="o.id" class="tl-order tl-click" t-on-click="() => this.openOrder(o)">
+                            <span><b><t t-out="o.name"/></b> <t t-out="o.device"/> <small class="tl-muted"><t t-out="o.date"/></small></span>
+                            <span t-attf-class="tl-status tl-status-#{o.status}"><t t-out="o.status_label"/></span>
+                            <span><b><t t-out="money(o.total)"/></b><small t-if="o.balance > 0" class="tl-owed"> · debe <t t-out="money(o.balance)"/></small></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

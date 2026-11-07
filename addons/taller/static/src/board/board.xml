@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Board">
+        <div class="o_taller_board">
+            <div class="tb-head">
+                <div>
+                    <div class="tb-title">Órdenes de servicio</div>
+                    <div class="tb-sub">Arrastra una tarjeta (o usa la flecha) para avanzar su estado. Atajos: / buscar · N nueva · M mías · L atrasadas.</div>
+                </div>
+                <div class="tb-tools">
+                    <div class="tb-search">
+                        <i class="fa fa-search"/>
+                        <input type="text" placeholder="Buscar orden, cliente o IMEI..."
+                               t-att-value="state.search" t-on-input="onSearch"/>
+                    </div>
+                    <button t-attf-class="tb-chip #{state.mine ? 'on' : ''}" t-on-click="toggleMine">
+                        <i class="fa fa-user"/> Mías
+                    </button>
+                    <button t-attf-class="tb-chip #{state.late ? 'on late' : ''}" t-on-click="toggleLate">
+                        <i class="fa fa-clock-o"/> Atrasadas
+                    </button>
+                    <div class="tb-viewtoggle">
+                        <button t-attf-class="tb-chip #{state.view === 'cols' ? 'on' : ''}" t-on-click="() => this.setView('cols')" title="Columnas"><i class="fa fa-columns"/></button>
+                        <button t-attf-class="tb-chip #{state.view === 'list' ? 'on' : ''}" t-on-click="() => this.setView('list')" title="Lista"><i class="fa fa-list"/></button>
+                    </div>
+                    <button class="tb-new" t-on-click="newOrder"><i class="fa fa-plus"/> Nueva orden</button>
+                </div>
+            </div>
+
+            <div class="tb-techs" t-if="state.data.techs and state.data.techs.length > 1">
+                <button t-attf-class="tb-chip #{!state.tech ? 'on' : ''}" t-on-click="() => this.setTech(0)">Todos</button>
+                <button t-foreach="state.data.techs" t-as="tc" t-key="tc.id"
+                        t-attf-class="tb-chip #{state.tech === tc.id ? 'on' : ''}" t-on-click="() => this.setTech(tc.id)">
+                    <t t-out="tc.name"/>
+                </button>
+            </div>
+
+            <div t-if="state.peek" class="tb-peek" t-attf-style="left: #{state.peek.x}px; top: #{state.peek.y}px">
+                <div class="tb-peek-head"><b><t t-out="state.peek.card.name"/></b> <span><t t-out="state.peek.card.customer"/></span></div>
+                <div class="tb-peek-row"><i t-attf-class="fa #{state.peek.card.device_type === 'phone' ? 'fa-mobile' : (state.peek.card.device_type === 'tablet' ? 'fa-tablet' : 'fa-laptop')}"/> <t t-out="state.peek.card.device"/>
+                    <small t-if="state.peek.card.serial"> · <t t-out="state.peek.card.serial"/></small></div>
+                <div class="tb-peek-problem" t-if="state.peek.card.problem"><t t-out="state.peek.card.problem"/></div>
+                <div class="tb-peek-row tb-peek-meta">
+                    <span t-if="state.peek.card.phone"><i class="fa fa-phone"/> <t t-out="state.peek.card.phone"/></span>
+                    <span t-if="state.peek.card.tech"><i class="fa fa-user"/> <t t-out="state.peek.card.tech"/></span>
+                    <span t-if="state.peek.card.promise"><i class="fa fa-calendar"/> <t t-out="state.peek.card.promise"/></span>
+                </div>
+            </div>
+
+            <div t-if="state.loading" class="tb-cols tb-skel">
+                <div t-foreach="[1, 2, 3, 4, 5]" t-as="n" t-key="n" class="t-skel-card tall"/>
+            </div>
+            <div t-elif="state.view === 'list'" class="tb-listwrap">
+                <table class="tb-table">
+                    <thead>
+                        <tr>
+                            <th t-on-click="() => this.setSort('name')">Orden</th>
+                            <th t-on-click="() => this.setSort('customer')">Cliente</th>
+                            <th t-on-click="() => this.setSort('device')">Equipo</th>
+                            <th t-on-click="() => this.setSort('col_label')">Estado</th>
+                            <th t-on-click="() => this.setSort('days')">Días</th>
+                            <th t-on-click="() => this.setSort('total')">Total</th>
+                            <th>Técnico</th>
+                            <th/>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr t-foreach="listRows" t-as="row" t-key="row.id" t-attf-class="#{row.late ? 'late' : ''}" t-on-click="() => this.openCard(row)">
+                            <td><b t-out="row.name"/> <span t-if="row.late" class="tb-flag red">Atrasada</span></td>
+                            <td t-out="row.customer"/>
+                            <td t-out="row.device"/>
+                            <td><span t-attf-class="ts-pill ts-pill-#{row.col_key}"><t t-out="row.col_label"/></span></td>
+                            <td t-out="row.days"/>
+                            <td><t t-out="money(row.total)"/></td>
+                            <td t-out="row.tech or ''"/>
+                            <td><button t-if="row.next_key" class="tb-next" t-on-click.stop="() => this.advance(row, row.col_key)"><i class="fa fa-arrow-right"/></button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <div t-if="!listRows.length" class="t-empty"><i class="fa fa-th-list"/><b>No hay órdenes con estos filtros</b></div>
+            </div>
+            <div t-else="" class="tb-cols">
+                <div t-foreach="state.data.columns" t-as="col" t-key="col.key"
+                     t-attf-class="tb-col tb-col-#{col.key} #{state.overKey === col.key ? 'over' : ''}"
+                     t-on-dragover="(ev) => this.dragOver(ev, col)"
+                     t-on-dragleave="(ev) => this.dragLeave(ev, col)"
+                     t-on-drop="(ev) => this.drop(ev, col)">
+                    <div class="tb-col-head">
+                        <span><t t-out="col.label"/></span>
+                        <b><t t-out="col.count"/></b>
+                    </div>
+                    <div class="tb-col-body">
+                        <div t-foreach="col.cards" t-as="card" t-key="card.id"
+                             t-attf-class="tb-card #{card.late ? 'late' : (card.days >= 7 ? 'old' : '')} #{state.dragId === card.id ? 'dragging' : ''}"
+                             draggable="true"
+                             t-on-dragstart="(ev) => this.dragStart(ev, card, col)"
+                             t-on-mouseenter="(ev) => this.showPeek(ev, card)"
+                             t-on-mouseleave="hidePeek"
+                             t-on-dragend="dragEnd"
+                             t-on-click="() => this.openCard(card)">
+                            <div class="tb-card-top">
+                                <b><t t-out="card.name"/></b>
+                                <span t-if="card.late" class="tb-flag red">Atrasada</span>
+                                <span t-if="card.recurrent" class="tb-flag amber">Reincidencia</span>
+                            </div>
+                            <div class="tb-customer"><t t-out="card.customer"/></div>
+                            <div class="tb-device">
+                                <i t-attf-class="fa #{card.device_type === 'phone' ? 'fa-mobile' : (card.device_type === 'tablet' ? 'fa-tablet' : 'fa-laptop')}"/>
+                                <t t-out="card.device"/>
+                            </div>
+                            <div class="tb-card-foot">
+                                <span class="tb-meta">
+                                    <i class="fa fa-clock-o"/> <t t-out="card.days"/> d
+                                    <t t-if="card.promise"> · <i class="fa fa-calendar"/> <t t-out="card.promise"/></t>
+                                </span>
+                                <span class="tb-foot-right">
+                                    <span class="tb-tech" t-if="card.tech_initial" t-att-title="card.tech"><t t-out="card.tech_initial"/></span>
+                                    <button t-if="card.next_key" class="tb-next" title="Avanzar al siguiente estado"
+                                            t-on-click.stop="() => this.advance(card, col.key)"><i class="fa fa-arrow-right"/></button>
+                                </span>
+                            </div>
+                            <div class="tb-card-money">
+                                <b><t t-out="money(card.total)"/></b>
+                                <span t-if="card.balance > 0" class="tb-flag amber">Saldo <t t-out="money(card.balance)"/></span>
+                            </div>
+                        </div>
+                        <div t-if="col.more" class="tb-more">+ <t t-out="col.more"/> más (usa la búsqueda)</div>
+                        <div t-if="!col.count" class="tb-empty">Sin órdenes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

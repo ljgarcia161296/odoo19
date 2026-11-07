@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Shell">
+        <div class="ts-root">
+            <aside t-if="state.visible" t-attf-class="ts-sidebar #{state.collapsed ? 'collapsed' : ''}">
+                <div class="ts-brand">
+                    <img class="ts-logo" src="/web/binary/company_logo" alt="Logo"
+                         onerror="this.style.display='none'"/>
+                    <span class="ts-brand-name">Taller</span>
+                </div>
+                <button class="ts-searchbtn" t-on-click="openSearch" title="Buscar (Ctrl+K)">
+                    <i class="fa fa-search"/>
+                    <span class="ts-label">Buscar...</span>
+                    <kbd class="ts-label">Ctrl K</kbd>
+                </button>
+                <nav class="ts-nav">
+                    <t t-foreach="items" t-as="item" t-key="item.id">
+                        <div t-attf-class="ts-item #{isActive(item) or isGroupActive(item) ? 'active' : ''}"
+                             t-on-click="() => this.clickItem(item)" t-att-title="item.name">
+                            <i t-attf-class="fa #{item.icon}"/>
+                            <span class="ts-label"><t t-out="item.name"/></span>
+                            <i t-if="item.children.length"
+                               t-attf-class="fa ts-chev ts-label #{isOpen(item) ? 'fa-angle-up' : 'fa-angle-down'}"/>
+                        </div>
+                        <div t-if="item.children.length and isOpen(item) and !state.collapsed" class="ts-sub">
+                            <div t-foreach="item.children" t-as="child" t-key="child.id"
+                                 t-attf-class="ts-subitem #{isActive(child) ? 'active' : ''}"
+                                 t-on-click="() => this.clickChild(child)">
+                                <t t-out="child.name"/>
+                            </div>
+                        </div>
+                    </t>
+                </nav>
+                <button class="ts-collapse" t-on-click="() => this.openHelp()" title="Ayuda (tecla ?)">
+                    <i class="fa fa-question-circle"/>
+                    <span class="ts-label">Ayuda</span>
+                </button>
+                <button class="ts-collapse" t-on-click="startScan" title="Escanear el QR de una etiqueta">
+                    <i class="fa fa-qrcode"/>
+                    <span class="ts-label">Escanear QR</span>
+                </button>
+                <button t-if="state.canInstall" class="ts-collapse" t-on-click="installApp" title="Instalar como aplicación">
+                    <i class="fa fa-download"/>
+                    <span class="ts-label">Instalar app</span>
+                </button>
+                <div class="ts-themes ts-label" title="Color del sistema">
+                    <button t-foreach="themes" t-as="th" t-key="th.key"
+                            t-attf-class="ts-theme-dot #{state.theme === th.key ? 'on' : ''}"
+                            t-attf-style="background: #{th.color}" t-att-title="th.label"
+                            t-on-click="() => this.setTheme(th.key)"/>
+                </div>
+                <button class="ts-collapse" t-on-click="toggleDark" title="Modo oscuro o claro">
+                    <i t-attf-class="fa #{state.dark ? 'fa-sun-o' : 'fa-moon-o'}"/>
+                    <span class="ts-label"><t t-out="state.dark ? 'Modo claro' : 'Modo oscuro'"/></span>
+                </button>
+                <button class="ts-collapse" t-on-click="toggleCollapsed" title="Ocultar o mostrar el menú">
+                    <i t-attf-class="fa #{state.collapsed ? 'fa-angle-double-right' : 'fa-angle-double-left'}"/>
+                    <span class="ts-label">Ocultar menú</span>
+                </button>
+            </aside>
+
+            <div t-if="state.help.open" class="ts-overlay" t-on-click="closeHelp">
+                <div class="ts-modal ts-help" t-on-click.stop="">
+                    <div class="ts-modal-head">
+                        <i class="fa fa-question-circle"/>
+                        <b>Ayuda</b>
+                        <button class="ts-scan-close" t-on-click="closeHelp"><i class="fa fa-times"/></button>
+                    </div>
+                    <div class="ts-help-tabs">
+                        <button t-attf-class="#{state.help.mode === 'screen' ? 'on' : ''}" t-on-click="() => { state.help.mode = 'screen'; }">Esta pantalla</button>
+                        <button t-attf-class="#{state.help.mode === 'tour' ? 'on' : ''}" t-on-click="() => { state.help.mode = 'tour'; state.help.step = 0; }">Recorrido</button>
+                        <button t-attf-class="#{state.help.mode === 'keys' ? 'on' : ''}" t-on-click="() => { state.help.mode = 'keys'; }">Atajos</button>
+                    </div>
+                    <div t-if="state.help.mode === 'screen'" class="ts-help-body">
+                        <div class="ts-help-title"><t t-out="helpScreen.name"/></div>
+                        <ul class="ts-help-list">
+                            <li t-foreach="helpScreen.tips" t-as="tip" t-key="tip_index"><t t-out="tip"/></li>
+                        </ul>
+                    </div>
+                    <div t-elif="state.help.mode === 'tour'" class="ts-help-body ts-help-tour">
+                        <i t-attf-class="fa #{tour[state.help.step].icon} ts-help-big"/>
+                        <div class="ts-help-title"><t t-out="tour[state.help.step].title"/></div>
+                        <p><t t-out="tour[state.help.step].text"/></p>
+                        <div class="ts-help-dots">
+                            <span t-foreach="tour" t-as="st" t-key="st_index" t-attf-class="#{st_index === state.help.step ? 'on' : ''}"/>
+                        </div>
+                        <div class="ts-help-nav">
+                            <button class="ts-help-btn" t-if="state.help.step > 0" t-on-click="() => this.helpStep(-1)">Anterior</button>
+                            <button class="ts-help-btn primary" t-on-click="() => this.helpStep(1)"><t t-out="state.help.step === tour.length - 1 ? 'Listo' : 'Siguiente'"/></button>
+                        </div>
+                    </div>
+                    <div t-else="" class="ts-help-body">
+                        <div t-foreach="shortcuts" t-as="sc" t-key="sc_index" class="ts-help-key">
+                            <kbd><t t-out="sc[0]"/></kbd><span><t t-out="sc[1]"/></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div t-if="state.scan.open" class="ts-overlay" t-on-click="stopScan">
+                <div class="ts-modal ts-scan" t-on-click.stop="">
+                    <div class="ts-modal-head">
+                        <i class="fa fa-qrcode"/>
+                        <b>Escanear etiqueta</b>
+                        <button class="ts-scan-close" t-on-click="stopScan"><i class="fa fa-times"/></button>
+                    </div>
+                    <video t-ref="scanVideo" class="ts-video" playsinline="playsinline" muted="muted"/>
+                    <div class="ts-none"><t t-out="state.scan.msg"/></div>
+                </div>
+            </div>
+
+            <div t-if="state.search.open" class="ts-overlay" t-on-click="closeSearch">
+                <div class="ts-modal" t-on-click.stop="">
+                    <div class="ts-modal-head">
+                        <i class="fa fa-search"/>
+                        <input class="ts-search-input" type="text" autocomplete="off"
+                               placeholder="Buscar o escribir un comando (ej: caja, nueva orden)..."
+                               t-att-value="state.search.query" t-on-input="onQuery" t-on-keydown="onSearchKey"/>
+                        <kbd>Esc</kbd>
+                    </div>
+                    <div class="ts-results">
+                        <div t-foreach="results" t-as="res" t-key="res_index"
+                             t-attf-class="ts-result #{res_index === state.search.index ? 'on' : ''}"
+                             t-on-click="() => this.run(res)">
+                            <i t-attf-class="fa #{res.icon}"/>
+                            <div>
+                                <div class="ts-result-label"><t t-out="res.label"/><span t-if="res.status" t-attf-class="ts-pill ts-pill-#{res.status}"><t t-out="res.pill"/></span></div>
+                                <div class="ts-result-sub"><t t-out="res.sub"/></div>
+                            </div>
+                        </div>
+                        <div t-if="state.search.query.trim().length >= 1 and !results.length" class="ts-none">
+                            Sin resultados.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

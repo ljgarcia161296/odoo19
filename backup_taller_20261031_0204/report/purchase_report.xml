@@ -1,0 +1,59 @@
+<odoo>
+    <record id="action_report_purchase" model="ir.actions.report">
+        <field name="name">Orden de compra</field>
+        <field name="model">service.purchase</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">taller.report_purchase</field>
+        <field name="report_file">taller.report_purchase</field>
+        <field name="print_report_name">'Compra-%s' % (object.name.replace('/', '-'))</field>
+        <field name="binding_model_id" ref="model_service_purchase"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_purchase">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.external_layout">
+                    <div class="page">
+                        <h2>Orden de compra <span t-field="o.name"/></h2>
+                        <div class="row mt-3 mb-3">
+                            <div class="col-6">
+                                <strong>Proveedor:</strong> <span t-field="o.partner_id"/>
+                            </div>
+                            <div class="col-6">
+                                <strong>Fecha:</strong> <span t-field="o.date"/><br/>
+                                <strong>Estado:</strong> <span t-field="o.state"/>
+                            </div>
+                        </div>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Repuesto</th>
+                                    <th class="text-end">Cant.</th>
+                                    <th class="text-end">Costo unit.</th>
+                                    <th class="text-end">Subtotal</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr t-foreach="o.line_ids" t-as="l">
+                                    <td><span t-field="l.part_id"/></td>
+                                    <td class="text-end"><span t-field="l.quantity"/></td>
+                                    <td class="text-end"><span t-field="l.unit_cost"/></td>
+                                    <td class="text-end"><span t-field="l.subtotal"/></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="row">
+                            <div class="col-6 offset-6">
+                                <table class="table table-sm">
+                                    <tr><td><strong>Total</strong></td><td class="text-end"><strong><span t-field="o.total"/></strong></td></tr>
+                                </table>
+                            </div>
+                        </div>
+                        <t t-if="o.note"><p><span t-field="o.note"/></p></t>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

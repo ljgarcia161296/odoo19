@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Caja">
+        <div class="o_taller_caja">
+            <div t-if="!state.data" class="t-skel">
+                <div class="t-skel-line w30"/>
+                <div class="t-skel-line w60"/>
+                <div class="t-skel-cards"><div class="t-skel-card"/><div class="t-skel-card"/><div class="t-skel-card"/><div class="t-skel-card"/></div>
+                <div class="t-skel-card tall"/>
+            </div>
+                        <div t-if="state.data" class="tj-wrap">
+                <div class="tj-head">
+                    <div>
+                        <div class="tj-title">Caja diaria</div>
+                        <div class="tj-sub">Cobros registrados en las órdenes de servicio.</div>
+                    </div>
+                    <div class="tj-tools">
+                        <button class="tj-btn" t-on-click="() => this.shiftDay(-1)"><i class="fa fa-angle-left"/></button>
+                        <input type="date" t-att-value="state.date" t-on-change="onDate"/>
+                        <button class="tj-btn" t-on-click="() => this.shiftDay(1)"><i class="fa fa-angle-right"/></button>
+                        <button class="tj-btn" t-on-click="goToday">Hoy</button>
+                        <button class="tj-btn" t-on-click="print"><i class="fa fa-print"/> Imprimir</button>
+                    </div>
+                </div>
+
+                <div class="tj-cards">
+                    <div class="tj-card tj-total">
+                        <span>Total del día</span>
+                        <b><t t-out="money(state.data.total)"/></b>
+                        <small><t t-out="state.data.count"/> cobros</small>
+                    </div>
+                    <div t-foreach="state.data.methods" t-as="m" t-key="m.key" class="tj-card">
+                        <span><t t-out="m.label"/></span>
+                        <b><t t-out="money(m.total)"/></b>
+                    </div>
+                </div>
+
+                <div class="tj-cols">
+                    <div class="tj-panel">
+                        <div class="tj-panel-title">Arqueo de efectivo</div>
+                        <div class="tj-kv"><span>Efectivo según el sistema</span><b><t t-out="money(cash)"/></b></div>
+                        <label class="tj-inline">Efectivo contado en caja
+                            <input type="number" min="0" t-model="state.counted" placeholder="0"/>
+                        </label>
+                        <div t-if="diff !== null" t-attf-class="tj-diff #{diff === 0 ? 'ok' : (diff > 0 ? 'plus' : 'minus')}">
+                            <t t-if="diff === 0">La caja cuadra.</t>
+                            <t t-elif="diff > 0">Sobran <t t-out="money(diff)"/></t>
+                            <t t-else="">Faltan <t t-out="money(-diff)"/></t>
+                        </div>
+                    </div>
+                    <div class="tj-panel">
+                        <div class="tj-panel-title">Últimos 7 días</div>
+                        <div t-foreach="state.data.week" t-as="w" t-key="w_index" class="tj-bar">
+                            <span><t t-out="w.date"/></span>
+                            <div class="tj-track"><div class="tj-fill" t-attf-style="width: #{Math.round(w.total / weekMax * 100)}%"/></div>
+                            <b><t t-out="money(w.total)"/></b>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tj-panel">
+                    <div class="tj-panel-title">Movimientos</div>
+                    <div t-if="!state.data.rows.length" class="t-empty"><i class="fa fa-money"/><b>No hay cobros en esta fecha</b><span>Los pagos de órdenes y las ventas de mostrador aparecen acá.</span></div>
+                    <div t-foreach="state.data.rows" t-as="r" t-key="r.id" class="tj-row" t-on-click="() => this.openOrder(r)">
+                        <span class="tj-time"><t t-out="r.time"/></span>
+                        <span class="tj-order"><b><t t-out="r.order"/></b> <t t-out="r.customer"/></span>
+                        <span class="tj-method"><t t-out="r.method_label"/><t t-if="r.note"> · <t t-out="r.note"/></t></span>
+                        <b class="tj-amount"><t t-out="money(r.amount)"/></b>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

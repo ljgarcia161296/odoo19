@@ -1,0 +1,6 @@
+<odoo noupdate="1">
+    <record id="param_prices_include_tax" model="ir.config_parameter">
+        <field name="key">taller.prices_include_tax</field>
+        <field name="value">0</field>
+    </record>
+</odoo>

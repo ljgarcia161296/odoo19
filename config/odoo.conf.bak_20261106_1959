@@ -1,0 +1,12 @@
+[options]
+admin_passwd = uoYzX0GJRUwmrP8zBldsG90
+db_host = db
+db_port = 5432
+db_user = odoo
+db_password = 4uK90awgBFDtgXT2FQKrAEwb
+addons_path = /mnt/extra-addons
+db_name = JaviCompanyNew
+dbfilter = ^JaviCompanyNew$
+list_db = False
+
+proxy_mode = True

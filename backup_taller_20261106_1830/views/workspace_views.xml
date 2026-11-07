@@ -1,0 +1,39 @@
+<odoo>
+    <record id="action_taller_counter" model="ir.actions.client">
+        <field name="name">Recepción</field>
+        <field name="tag">taller.counter</field>
+    </record>
+
+    <record id="action_taller_tech" model="ir.actions.client">
+        <field name="name">Mi trabajo</field>
+        <field name="tag">taller.tech</field>
+    </record>
+
+    <record id="action_taller_board" model="ir.actions.client">
+        <field name="name">Órdenes de servicio</field>
+        <field name="tag">taller.board</field>
+    </record>
+
+    <!-- El menú principal de órdenes abre el tablero; la lista clásica queda en Configuración -->
+    <menuitem id="menu_service_order" name="Órdenes de Servicio" parent="menu_taller_root"
+              action="action_taller_board" sequence="10"/>
+    <menuitem id="menu_taller_classic_orders" name="Órdenes (lista clásica)" parent="menu_taller_config"
+              action="action_service_order" sequence="30"/>
+
+    <menuitem id="menu_taller_counter" name="Recepción" parent="menu_taller_root"
+              action="action_taller_counter" sequence="2"/>
+    <menuitem id="menu_taller_tech" name="Mi trabajo" parent="menu_taller_root"
+              action="action_taller_tech" sequence="3"/>
+
+    <!-- Firma de conformidad al ingreso en el PDF de la orden -->
+    <template id="report_service_order_intake_signature" inherit_id="report_service_order">
+        <xpath expr="//div[hasclass('page')]" position="inside">
+            <t t-if="o.intake_signature">
+                <div class="mt-4" style="page-break-inside: avoid;">
+                    <img t-att-src="image_data_uri(o.intake_signature)" style="max-height: 70px;"/><br/>
+                    Conformidad del cliente al ingreso
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>

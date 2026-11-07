@@ -1,0 +1,66 @@
+<odoo>
+    <record id="rule_service_order_technician" model="ir.rule">
+        <field name="name">Taller: el técnico ve sus órdenes</field>
+        <field name="model_id" ref="model_service_order"/>
+        <field name="groups" eval="[(4, ref('group_taller_technician'))]"/>
+        <field name="domain_force">['|', ('user_id', '=', user.id), ('user_id', '=', False)]</field>
+    </record>
+    <record id="rule_service_order_manager" model="ir.rule">
+        <field name="name">Taller: el administrador ve todas las órdenes</field>
+        <field name="model_id" ref="model_service_order"/>
+        <field name="groups" eval="[(4, ref('group_taller_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_service_order_line_technician" model="ir.rule">
+        <field name="name">Taller: el técnico ve los repuestos de sus órdenes</field>
+        <field name="model_id" ref="model_service_order_line"/>
+        <field name="groups" eval="[(4, ref('group_taller_technician'))]"/>
+        <field name="domain_force">['|', ('order_id.user_id', '=', user.id), ('order_id.user_id', '=', False)]</field>
+    </record>
+    <record id="rule_service_order_line_manager" model="ir.rule">
+        <field name="name">Taller: el administrador ve todos los repuestos de órdenes</field>
+        <field name="model_id" ref="model_service_order_line"/>
+        <field name="groups" eval="[(4, ref('group_taller_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_service_payment_technician" model="ir.rule">
+        <field name="name">Taller: el técnico ve los pagos de sus órdenes</field>
+        <field name="model_id" ref="model_service_payment"/>
+        <field name="groups" eval="[(4, ref('group_taller_technician'))]"/>
+        <field name="domain_force">['|', ('order_id.user_id', '=', user.id), ('order_id.user_id', '=', False)]</field>
+    </record>
+    <record id="rule_service_payment_manager" model="ir.rule">
+        <field name="name">Taller: el administrador ve todos los pagos</field>
+        <field name="model_id" ref="model_service_payment"/>
+        <field name="groups" eval="[(4, ref('group_taller_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_service_order_check_technician" model="ir.rule">
+        <field name="name">Taller: el técnico ve el checklist de sus órdenes</field>
+        <field name="model_id" ref="model_service_order_check"/>
+        <field name="groups" eval="[(4, ref('group_taller_technician'))]"/>
+        <field name="domain_force">['|', ('order_id.user_id', '=', user.id), ('order_id.user_id', '=', False)]</field>
+    </record>
+    <record id="rule_service_order_check_manager" model="ir.rule">
+        <field name="name">Taller: el administrador ve todos los checklists</field>
+        <field name="model_id" ref="model_service_order_check"/>
+        <field name="groups" eval="[(4, ref('group_taller_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+
+    <record id="rule_service_order_photo_technician" model="ir.rule">
+        <field name="name">Taller: el técnico ve las fotos de sus órdenes</field>
+        <field name="model_id" ref="model_service_order_photo"/>
+        <field name="groups" eval="[(4, ref('group_taller_technician'))]"/>
+        <field name="domain_force">['|', ('order_id.user_id', '=', user.id), ('order_id.user_id', '=', False)]</field>
+    </record>
+    <record id="rule_service_order_photo_manager" model="ir.rule">
+        <field name="name">Taller: el administrador ve todas las fotos</field>
+        <field name="model_id" ref="model_service_order_photo"/>
+        <field name="groups" eval="[(4, ref('group_taller_manager'))]"/>
+        <field name="domain_force">[(1, '=', 1)]</field>
+    </record>
+</odoo>

@@ -1,0 +1,49 @@
+<odoo>
+    <record id="action_taller_calendar_ui" model="ir.actions.client">
+        <field name="name">Calendario de entregas</field>
+        <field name="tag">taller.calendar</field>
+    </record>
+    <record id="action_taller_compras_ui" model="ir.actions.client">
+        <field name="name">Compras</field>
+        <field name="tag">taller.compras</field>
+    </record>
+    <record id="action_taller_garantias_ui" model="ir.actions.client">
+        <field name="name">Garantías</field>
+        <field name="tag">taller.garantias</field>
+    </record>
+    <record id="action_taller_config_ui" model="ir.actions.client">
+        <field name="name">Configuración del taller</field>
+        <field name="tag">taller.config</field>
+    </record>
+
+    <record id="action_taller_panel_ui" model="ir.actions.client">
+        <field name="name">Panel de gestión</field>
+        <field name="tag">taller.panel</field>
+    </record>
+    <record id="action_taller_mensajes_ui" model="ir.actions.client">
+        <field name="name">Mensajes pendientes</field>
+        <field name="tag">taller.mensajes</field>
+    </record>
+    <record id="action_taller_actividad_ui" model="ir.actions.client">
+        <field name="name">Registro de actividad</field>
+        <field name="tag">taller.actividad</field>
+    </record>
+    <menuitem id="menu_taller_panel" name="Panel de gestión" parent="menu_taller_root"
+              action="action_taller_panel_ui" sequence="3"/>
+    <menuitem id="menu_taller_mensajes" name="Mensajes" parent="menu_taller_root"
+              action="action_taller_mensajes_ui" sequence="21"/>
+    <menuitem id="menu_taller_actividad" name="Actividad" parent="menu_taller_config"
+              action="action_taller_actividad_ui" sequence="2" groups="group_taller_manager"/>
+    <menuitem id="menu_taller_calendar" name="Calendario" parent="menu_taller_root"
+              action="action_taller_calendar_ui" sequence="4"/>
+    <menuitem id="menu_taller_calendar_classic" name="Calendario (vista clásica)" parent="menu_taller_config"
+              action="action_taller_calendar" sequence="32"/>
+    <menuitem id="menu_taller_purchases" name="Compras" parent="menu_taller_inventory"
+              action="action_taller_compras_ui" sequence="30" groups="group_taller_manager"/>
+    <menuitem id="menu_taller_purchases_classic" name="Compras (lista clásica)" parent="menu_taller_config"
+              action="action_service_purchase" sequence="33"/>
+    <menuitem id="menu_taller_garantias" name="Garantías" parent="menu_taller_root"
+              action="action_taller_garantias_ui" sequence="22"/>
+    <menuitem id="menu_taller_config_ui" name="Datos del taller" parent="menu_taller_config"
+              action="action_taller_config_ui" sequence="1" groups="group_taller_manager"/>
+</odoo>

@@ -1,0 +1,316 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Ficha">
+        <div class="o_taller_ficha">
+            <div t-if="!state.data and !state.missing" class="t-skel">
+                <div class="t-skel-line w30"/>
+                <div class="t-skel-line w60"/>
+                <div class="t-skel-cards"><div class="t-skel-card"/><div class="t-skel-card"/><div class="t-skel-card"/><div class="t-skel-card"/></div>
+                <div class="t-skel-card tall"/>
+            </div>
+            <div t-if="state.missing" class="tf-wrap">
+                <div class="tf-card tf-emptycard">
+                    <h2>Abre la orden desde el tablero</h2>
+                    <p class="tf-muted">Esta pantalla necesita saber qué orden mostrar.</p>
+                    <button class="tf-btn tf-primary" t-on-click="goBoard">Ir al tablero</button>
+                </div>
+            </div>
+
+            <t t-elif="state.data">
+                <t t-set="d" t-value="state.data"/>
+                <div class="tf-wrap">
+
+                    <!-- ===== Encabezado ===== -->
+                    <div class="tf-top">
+                        <button class="tf-back" t-on-click="goBoard"><i class="fa fa-angle-left"/> Órdenes</button>
+                        <div class="tf-title">
+                            <span class="t-device-icon"><i t-attf-class="fa #{deviceIcon(d.device.type)}"/></span>
+                            <h1><t t-out="d.name"/></h1>
+                            <span t-attf-class="tf-pill tf-pill-#{d.status}"><t t-out="d.status_label"/></span>
+                            <span t-if="d.late" class="tf-badge tf-badge-red">Atrasada</span>
+                            <span t-if="d.recurrent" class="tf-badge tf-badge-amber">Reincidencia</span>
+                            <span t-if="d.no_charge" class="tf-badge tf-badge-blue">Sin cargo</span>
+                        </div>
+                        <div class="tf-tools">
+                            <button class="tf-btn" t-on-click="toggleDrawer" title="Historial y notas (H)">
+                                <i class="fa fa-comments-o"/> Historial
+                                <span class="tf-count" t-if="d.timeline.length"><t t-out="d.timeline.length"/></span>
+                            </button>
+                            <button class="tf-btn" t-on-click="printOrder"><i class="fa fa-print"/> Imprimir</button>
+                            <button class="tf-btn" t-on-click="printLabel"><i class="fa fa-tag"/> Etiqueta</button>
+                            <button class="tf-btn" t-on-click="openClassic"><i class="fa fa-external-link"/> Ficha clásica</button>
+                        </div>
+                    </div>
+
+                    <div class="tf-steps">
+                        <div t-foreach="d.steps" t-as="s" t-key="s.key" t-attf-class="tf-step tf-step-#{s.state}">
+                            <span class="tf-dot"/>
+                            <span><t t-out="s.label"/></span>
+                        </div>
+                    </div>
+
+                    <div class="tf-actions" t-if="d.actions.length or d.can_invoice or d.invoice">
+                        <button t-foreach="d.actions" t-as="a" t-key="a.key"
+                                t-attf-class="tf-btn tf-big #{a.primary ? 'tf-primary' : ''}"
+                                t-att-disabled="state.busy" t-on-click="() => this.runAction(a.key)">
+                            <t t-out="a.label"/>
+                        </button>
+                        <button t-if="d.can_invoice" class="tf-btn tf-big" t-on-click="createInvoice">
+                            <i class="fa fa-file-text-o"/> Crear factura
+                        </button>
+                        <button t-if="d.invoice" class="tf-btn tf-big" t-on-click="openInvoice">
+                            <i class="fa fa-file-text-o"/> Factura <t t-out="d.invoice.name"/>
+                        </button>
+                    </div>
+
+                    <div t-if="d.status === 'quote' or d.approved_date" class="tf-card tf-quote">
+                        <div t-if="d.status === 'quote'">
+                            <b>Esperando la respuesta del cliente</b>
+                            <span class="tf-muted"> · presupuesto enviado el <t t-out="d.quote_date or '—'"/></span>
+                            <div class="tf-row-actions">
+                                <button class="tf-btn" t-on-click="() => this.openUrl(d.links.wa_url)">
+                                    <i class="fa fa-whatsapp"/> Enviar presupuesto por WhatsApp
+                                </button>
+                                <button class="tf-btn" t-on-click="copyLink"><i class="fa fa-link"/> Copiar enlace de aprobación</button>
+                            </div>
+                        </div>
+                        <div t-else="">
+                            <i class="fa fa-check-circle tf-ok"/> Presupuesto aprobado el <b><t t-out="d.approved_date"/></b>
+                        </div>
+                    </div>
+
+                    <div class="tf-grid">
+                        <!-- ===== Columna izquierda ===== -->
+                        <div class="tf-col">
+                            <div class="tf-card">
+                                <div class="tf-label">Cliente</div>
+                                <div class="tf-big-text"><t t-out="d.partner.name"/></div>
+                                <div class="tf-muted tf-phone">
+                                    <input t-if="state.editPhone" type="text" class="tf-phone-input" t-model="state.phoneValue"
+                                           t-on-blur="savePhone" t-on-keydown="onPhoneKey" placeholder="Teléfono"/>
+                                    <span t-else="" t-attf-class="#{d.partner.id ? 'tf-editable' : ''}" t-on-click="() => d.partner.id and this.startPhone()"
+                                          title="Clic para editar">
+                                        <t t-out="d.partner.phone or 'Sin teléfono'"/> <i t-if="d.partner.id" class="fa fa-pencil tf-pencil"/>
+                                    </span>
+                                </div>
+                                <div class="tf-muted" t-if="d.partner.email"><t t-out="d.partner.email"/></div>
+                                <div class="tf-wa" t-if="state.waOpen and d.wa_templates.length">
+                                    <div class="tf-label">Mensaje por WhatsApp</div>
+                                    <div t-foreach="d.wa_templates" t-as="w" t-key="w.key"
+                                         t-attf-class="tf-wa-item #{w.suggested ? 'suggested' : ''}"
+                                         t-on-click="() => this.sendWa(w)">
+                                        <b><t t-out="w.label"/></b>
+                                        <span t-if="w.suggested" class="tf-wa-tag">Sugerido</span>
+                                        <div class="tf-muted tf-wa-text"><t t-out="w.text"/></div>
+                                    </div>
+                                </div>
+                                <div class="tf-row-actions" t-if="d.partner.phone">
+                                    <a class="tf-btn tf-small" t-att-href="d.links.tel"><i class="fa fa-phone"/> Llamar</a>
+                                    <button class="tf-btn tf-small" t-on-click="toggleWa" title="Mensajes de WhatsApp (W)">
+                                        <i class="fa fa-whatsapp"/> WhatsApp <i class="fa fa-caret-down"/>
+                                    </button>
+                                    <button class="tf-btn tf-small" t-on-click="() => this.openUrl(d.links.wa_track_url)">
+                                        <i class="fa fa-link"/> Seguimiento
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div class="tf-card">
+                                <div class="tf-label">Equipo · <t t-out="d.device.type_label"/></div>
+                                <div class="tf-fields">
+                                    <label>Marca
+                                        <input type="text" t-model="edit.brand" t-att-disabled="!d.editable"
+                                               t-on-input="() => this.markDirty('brand')"
+                                               t-on-blur="() => this.saveField('brand', 'device_brand')"/>
+                                    </label>
+                                    <label>Modelo
+                                        <input type="text" t-model="edit.model" t-att-disabled="!d.editable"
+                                               t-on-input="() => this.markDirty('model')"
+                                               t-on-blur="() => this.saveField('model', 'device_model')"/>
+                                    </label>
+                                    <label>Serie / IMEI
+                                        <input type="text" t-model="edit.serial" t-att-disabled="!d.editable"
+                                               t-on-input="() => this.markDirty('serial')"
+                                               t-on-blur="() => this.saveField('serial', 'serial_number')"/>
+                                    </label>
+                                    <label>Accesorios
+                                        <input type="text" t-model="edit.accessories" t-att-disabled="!d.editable"
+                                               t-on-input="() => this.markDirty('accessories')"
+                                               t-on-blur="() => this.saveField('accessories', 'accessories')"/>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="tf-card">
+                                <div class="tf-label">Plazos y responsable</div>
+                                <div class="tf-kv"><span>Ingreso</span><b><t t-out="d.date_received"/></b></div>
+                                <label class="tf-inline">Fecha prometida
+                                    <input type="date" t-model="edit.promise" t-att-disabled="!d.editable"
+                                           t-on-change="() => this.saveSelect('promise', 'promise_date')"/>
+                                </label>
+                                <div class="tf-kv" t-if="d.date_ready"><span>Quedó lista</span><b><t t-out="d.date_ready"/></b></div>
+                                <div class="tf-kv" t-if="d.date_finished"><span>Entrega</span><b><t t-out="d.date_finished"/></b></div>
+                                <label class="tf-inline" t-if="d.is_manager">Técnico
+                                    <select t-model="edit.user_id" t-on-change="() => this.saveSelect('user_id', 'user_id')">
+                                        <option value="">Sin asignar</option>
+                                        <option t-foreach="d.users" t-as="u" t-key="u.id" t-att-value="u.id"><t t-out="u.name"/></option>
+                                    </select>
+                                </label>
+                                <div class="tf-kv" t-else=""><span>Técnico</span><b><t t-out="d.user.name or 'Sin asignar'"/></b></div>
+                                <div class="tf-kv" t-if="d.warranty.end">
+                                    <span>Garantía hasta</span>
+                                    <b><t t-out="d.warranty.end"/> · <t t-out="d.warranty.label"/></b>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ===== Columna principal ===== -->
+                        <div class="tf-col tf-col-main">
+                            <div class="tf-card">
+                                <div class="tf-label">Problema reportado</div>
+                                <textarea rows="3" placeholder="Describe el problema del equipo..."
+                                          t-model="edit.problem" t-att-disabled="!d.editable"
+                                          t-on-input="() => this.markDirty('problem')"
+                                          t-on-blur="() => this.saveField('problem', 'issue_description')"/>
+                                <div class="tf-label tf-space">Estado físico al ingreso</div>
+                                <textarea rows="2" placeholder="Rayones, golpes, pantalla rota..."
+                                          t-model="edit.condition" t-att-disabled="!d.editable"
+                                          t-on-input="() => this.markDirty('condition')"
+                                          t-on-blur="() => this.saveField('condition', 'physical_condition')"/>
+                            </div>
+
+                            <div class="tf-money">
+                                <div><span>Total</span><b><t t-out="money(d.total)"/></b></div>
+                                <div><span>Pagado</span><b><t t-out="money(d.paid)"/></b></div>
+                                <div t-attf-class="#{d.balance > 0 ? 'owed' : ''}"><span>Saldo</span><b><t t-out="money(d.balance)"/></b></div>
+                            </div>
+
+                            <div class="tf-card tf-tabcard">
+                                <div class="tf-tabs">
+                                    <button t-foreach="tabs" t-as="tab" t-key="tab.key"
+                                            t-attf-class="tf-tab #{state.tab === tab.key ? 'on' : ''}"
+                                            t-on-click="() => this.setTab(tab.key)">
+                                        <i t-attf-class="fa #{tab.icon}"/> <t t-out="tab.label"/>
+                                    </button>
+                                </div>
+
+                                <!-- Repuestos -->
+                                <div t-if="state.tab === 'lines'" class="tf-pane">
+                                    <div t-if="!d.lines.length" class="tf-muted">Todavía no hay repuestos cargados.</div>
+                                    <div t-foreach="d.lines" t-as="l" t-key="l.id" class="tf-line">
+                                        <span><t t-out="l.name"/> <span class="tf-muted">× <t t-out="l.qty"/></span></span>
+                                        <span>
+                                            <b><t t-out="money(l.subtotal)"/></b>
+                                            <button t-if="d.editable" class="tf-mini" t-on-click="() => this.removeLine(l)">×</button>
+                                        </span>
+                                    </div>
+                                    <t t-if="d.editable">
+                                        <div class="tf-add">
+                                            <input type="text" placeholder="Buscar repuesto por nombre o código"
+                                                   t-att-value="state.partQuery" t-on-input="onPartQuery"/>
+                                            <input type="number" min="1" class="tf-qty" t-model.number="state.qty"/>
+                                        </div>
+                                        <div t-foreach="state.parts" t-as="p" t-key="p.id" class="tf-part" t-on-click="() => this.addPart(p)">
+                                            <span><t t-out="p.name"/></span>
+                                            <span class="tf-muted">Stock <t t-out="p.stock"/> · <t t-out="money(p.price)"/></span>
+                                        </div>
+                                        <div class="tf-add">
+                                            <input type="number" min="0" placeholder="Mano de obra" t-model="state.labor"
+                                                   t-on-input="() => this.markDirty('labor')"/>
+                                            <button class="tf-btn" t-on-click="saveLabor">Guardar</button>
+                                        </div>
+                                    </t>
+                                    <div class="tf-kv"><span>Repuestos</span><b><t t-out="money(d.parts_total)"/></b></div>
+                                    <div class="tf-kv"><span>Mano de obra</span><b><t t-out="money(d.labor)"/></b></div>
+                                </div>
+
+                                <!-- Pagos -->
+                                <div t-if="state.tab === 'payments'" class="tf-pane">
+                                    <div t-if="!d.payments.length" class="tf-muted">Todavía no hay pagos registrados.</div>
+                                    <div t-foreach="d.payments" t-as="pay" t-key="pay.id" class="tf-line">
+                                        <span><t t-out="pay.date"/> · <t t-out="pay.method"/>
+                                            <span class="tf-muted" t-if="pay.note"> · <t t-out="pay.note"/></span></span>
+                                        <b><t t-out="money(pay.amount)"/></b>
+                                    </div>
+                                    <div class="tf-add">
+                                        <input type="number" min="0" placeholder="Monto" t-model="state.payment.amount"/>
+                                        <select t-model="state.payment.method">
+                                            <option t-foreach="methods" t-as="m" t-key="m.key" t-att-value="m.key"><t t-out="m.label"/></option>
+                                        </select>
+                                    </div>
+                                    <div class="tf-add">
+                                        <input type="text" placeholder="Nota (opcional)" t-model="state.payment.note"/>
+                                        <button class="tf-btn" t-if="d.balance > 0" t-on-click="fillBalance">Cobrar saldo</button>
+                                        <button class="tf-btn tf-primary" t-on-click="addPayment">Registrar pago</button>
+                                    </div>
+                                </div>
+
+                                <!-- Checklist -->
+                                <div t-if="state.tab === 'checks'" class="tf-pane">
+                                    <div t-if="!d.checks.length" class="tf-muted">Esta orden no tiene checklist.</div>
+                                    <div t-foreach="d.checks" t-as="c" t-key="c.id" class="tf-check" t-on-click="() => this.cycleCheck(c)">
+                                        <span><t t-out="c.name"/></span>
+                                        <span t-attf-class="tf-result tf-result-#{c.result}"><t t-out="resultLabel[c.result]"/></span>
+                                    </div>
+                                </div>
+
+                                <!-- Fotos -->
+                                <div t-if="state.tab === 'photos'" t-attf-class="tf-pane tf-dropzone #{state.dropping ? 'over' : ''}"
+                                     t-on-dragover.prevent="onDragOverPhotos" t-on-dragleave="onDragLeavePhotos" t-on-drop.prevent="onDropPhotos">
+                                    <div class="tf-row-actions">
+                                        <button class="tf-btn tf-primary" t-on-click="pickCamera"><i class="fa fa-camera"/> Tomar foto</button>
+                                        <button class="tf-btn" t-on-click="pickGallery"><i class="fa fa-picture-o"/> Elegir de la galería</button>
+                                    </div>
+                                    <input type="file" t-ref="cameraInput" class="d-none" accept="image/*" capture="environment" t-on-change="onPhotos"/>
+                                    <input type="file" t-ref="galleryInput" class="d-none" accept="image/*" multiple="multiple" t-on-change="onPhotos"/>
+                                    <div t-if="!d.photos.length" class="t-empty"><i class="fa fa-camera"/><b>Todavía no hay fotos</b><span>Tomá una foto o arrastrá imágenes hasta acá.</span></div>
+                                    <div class="tf-photos">
+                                        <div t-foreach="d.photos" t-as="ph" t-key="ph.id" class="tf-photo" t-on-click="() => this.openUrl(ph.url)">
+                                            <img t-att-src="ph.url" alt="Foto"/>
+                                            <span><t t-out="ph.stage === 'delivery' ? 'Entrega' : 'Ingreso'"/></span>
+                                        </div>
+                                    </div>
+                                    <div class="tf-muted tf-space" t-if="d.has_intake_signature">
+                                        <i class="fa fa-check-circle tf-ok"/> Conformidad firmada por el cliente al ingreso.
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </t>
+
+            <aside t-if="state.data" t-attf-class="tf-drawer #{state.drawer ? 'open' : ''}">
+                <div class="tf-drawer-head">
+                    <b><i class="fa fa-comments-o"/> Historial y notas</b>
+                    <button class="tf-mini-close" t-on-click="toggleDrawer" title="Cerrar (Esc)"><i class="fa fa-times"/></button>
+                </div>
+                <div class="tf-drawer-add">
+                    <input type="text" placeholder="Escribe una nota interna..." t-model="state.note"
+                           t-ref="noteInput" t-on-keydown="onNoteKey"/>
+                    <button class="tf-btn tf-primary tf-small" t-on-click="addNote">Agregar</button>
+                </div>
+                <div class="tf-drawer-body">
+                    <div class="tf-timeline">
+                        <div t-foreach="state.data.timeline" t-as="e" t-key="e.id" t-attf-class="tf-event tf-event-#{e.kind}">
+                            <span class="tf-event-dot"/>
+                            <div>
+                                <div class="tf-event-head">
+                                    <b><t t-out="e.author"/></b> <span class="tf-muted"><t t-out="e.when"/></span>
+                                </div>
+                                <div t-foreach="e.changes" t-as="ch" t-key="ch_index">
+                                    <span class="tf-muted"><t t-out="ch.field"/>:</span>
+                                    <t t-out="ch.old or '—'"/> → <b><t t-out="ch.new or '—'"/></b>
+                                </div>
+                                <div t-if="e.text" class="tf-event-text"><t t-out="e.text"/></div>
+                            </div>
+                        </div>
+                        <div t-if="!state.data.timeline.length" class="tf-muted">Todavía no hay movimientos.</div>
+                    </div>
+                </div>
+            </aside>
+            <div t-if="state.data" class="tf-hint">Atajos: H historial · W WhatsApp · N nota · Esc volver</div>
+        </div>
+    </t>
+</templates>

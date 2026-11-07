@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Venta">
+        <div class="o_taller_venta">
+            <div class="tv2-head">
+                <div>
+                    <div class="tv2-title">Venta de mostrador</div>
+                    <div class="tv2-sub">Cobro rápido de accesorios y repuestos sin crear una orden.</div>
+                </div>
+                <div class="tv2-today">Hoy: <b><t t-out="money(state.today.total)"/></b></div>
+            </div>
+
+            <div class="tv2-grid">
+                <div class="tv2-left">
+                    <div class="tv2-card">
+                        <div class="tv2-search">
+                            <i class="fa fa-search"/>
+                            <input type="text" placeholder="Buscar artículo o código..." t-att-value="state.query" t-on-input="onQuery"/>
+                        </div>
+                        <div class="tv2-items">
+                            <button t-foreach="state.parts" t-as="p" t-key="p.id" class="tv2-item"
+                                    t-att-disabled="p.stock &lt;= 0" t-on-click="() => this.addPart(p)">
+                                <span class="tv2-item-name"><t t-out="p.name"/></span>
+                                <span class="tv2-item-meta">
+                                    <b><t t-out="money(p.price)"/></b>
+                                    <small t-attf-class="#{p.stock &lt;= 0 ? 'out' : ''}">Stock <t t-out="p.stock"/></small>
+                                </span>
+                            </button>
+                            <div t-if="!state.parts.length" class="tv2-muted">Sin resultados.</div>
+                        </div>
+                    </div>
+                    <div class="tv2-card">
+                        <div class="tv2-label">Artículo o servicio libre</div>
+                        <div class="tv2-add">
+                            <input type="text" placeholder="Descripción" t-model="state.free.name"/>
+                            <input type="number" min="0" placeholder="Precio" t-model="state.free.price" class="tv2-price"/>
+                            <button class="tv2-btn" t-on-click="addFree"><i class="fa fa-plus"/> Agregar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tv2-right">
+                    <div class="tv2-card tv2-cart">
+                        <div class="tv2-label">Carrito</div>
+                        <div t-if="!state.cart.length" class="t-empty"><i class="fa fa-shopping-cart"/><b>El carrito está vacío</b><span>Elegí un artículo de la lista.</span></div>
+                        <div t-foreach="state.cart" t-as="l" t-key="l.key" class="tv2-line">
+                            <div class="tv2-line-name"><t t-out="l.name"/></div>
+                            <div class="tv2-line-ctl">
+                                <button class="tv2-round" t-on-click="() => this.change(l, -1)">−</button>
+                                <b><t t-out="l.qty"/></b>
+                                <button class="tv2-round" t-on-click="() => this.change(l, 1)">+</button>
+                                <input type="number" min="0" t-att-value="l.price" t-on-change="(ev) => this.onPrice(l, ev)" class="tv2-price"/>
+                                <button class="tv2-x" t-on-click="() => this.remove(l)"><i class="fa fa-times"/></button>
+                            </div>
+                        </div>
+                        <input type="text" class="tv2-customer" placeholder="Cliente (opcional)" t-model="state.customer"/>
+                        <div class="tv2-methods">
+                            <button t-foreach="methods" t-as="m" t-key="m.key"
+                                    t-attf-class="tv2-method #{state.method === m.key ? 'on' : ''}"
+                                    t-on-click="() => this.state.method = m.key">
+                                <i t-attf-class="fa #{m.icon}"/> <t t-out="m.label"/>
+                            </button>
+                        </div>
+                        <div class="tv2-total"><span>Total</span><b><t t-out="money(total)"/></b></div>
+                        <button class="tv2-confirm" t-att-disabled="!state.cart.length or state.busy" t-on-click="confirm">
+                            <i class="fa fa-check"/> Cobrar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="tv2-card">
+                <div class="tv2-label">Ventas de hoy</div>
+                <div t-if="!state.today.sales.length" class="t-empty"><i class="fa fa-tags"/><b>Todavía no hay ventas hoy</b></div>
+                <div t-foreach="state.today.sales" t-as="s" t-key="s.id" t-attf-class="tv2-sale #{s.state === 'cancel' ? 'cancel' : ''}">
+                    <span><b><t t-out="s.name"/></b> <small class="tv2-muted"><t t-out="s.detail"/></small></span>
+                    <span class="tv2-muted"><t t-out="s.method"/></span>
+                    <b><t t-out="money(s.total)"/></b>
+                    <button t-if="state.today.is_manager and s.state === 'done'" class="tv2-x" title="Anular" t-on-click="() => this.cancelSale(s)">
+                        <i class="fa fa-undo"/>
+                    </button>
+                    <span t-if="s.state === 'cancel'" class="tv2-tag">Anulada</span>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

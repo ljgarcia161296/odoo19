@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Board">
+        <div class="o_taller_board">
+            <div class="tb-head">
+                <div>
+                    <div class="tb-title">Órdenes de servicio</div>
+                    <div class="tb-sub">Arrastra una tarjeta a la columna siguiente para avanzar su estado.</div>
+                </div>
+                <div class="tb-tools">
+                    <div class="tb-search">
+                        <i class="fa fa-search"/>
+                        <input type="text" placeholder="Buscar orden, cliente o IMEI..."
+                               t-att-value="state.search" t-on-input="onSearch"/>
+                    </div>
+                    <button t-attf-class="tb-chip #{state.mine ? 'on' : ''}" t-on-click="toggleMine">
+                        <i class="fa fa-user"/> Mías
+                    </button>
+                    <button t-attf-class="tb-chip #{state.late ? 'on late' : ''}" t-on-click="toggleLate">
+                        <i class="fa fa-clock-o"/> Atrasadas
+                    </button>
+                    <button class="tb-new" t-on-click="newOrder"><i class="fa fa-plus"/> Nueva orden</button>
+                </div>
+            </div>
+
+            <div class="tb-cols">
+                <div t-foreach="state.data.columns" t-as="col" t-key="col.key"
+                     t-attf-class="tb-col tb-col-#{col.key} #{state.overKey === col.key ? 'over' : ''}"
+                     t-on-dragover="(ev) => this.dragOver(ev, col)"
+                     t-on-dragleave="dragEnd"
+                     t-on-drop="(ev) => this.drop(ev, col)">
+                    <div class="tb-col-head">
+                        <span><t t-out="col.label"/></span>
+                        <b><t t-out="col.count"/></b>
+                    </div>
+                    <div class="tb-col-body">
+                        <div t-foreach="col.cards" t-as="card" t-key="card.id"
+                             t-attf-class="tb-card #{card.late ? 'late' : ''} #{state.dragId === card.id ? 'dragging' : ''}"
+                             draggable="true"
+                             t-on-dragstart="(ev) => this.dragStart(ev, card)"
+                             t-on-dragend="dragEnd"
+                             t-on-click="() => this.openCard(card)">
+                            <div class="tb-card-top">
+                                <b><t t-out="card.name"/></b>
+                                <span t-if="card.late" class="tb-flag red">Atrasada</span>
+                                <span t-if="card.recurrent" class="tb-flag amber">Reincidencia</span>
+                            </div>
+                            <div class="tb-customer"><t t-out="card.customer"/></div>
+                            <div class="tb-device">
+                                <i t-attf-class="fa #{card.device_type === 'phone' ? 'fa-mobile' : (card.device_type === 'tablet' ? 'fa-tablet' : 'fa-laptop')}"/>
+                                <t t-out="card.device"/>
+                            </div>
+                            <div class="tb-card-foot">
+                                <span class="tb-meta">
+                                    <i class="fa fa-clock-o"/> <t t-out="card.days"/> d
+                                    <t t-if="card.promise"> · <i class="fa fa-calendar"/> <t t-out="card.promise"/></t>
+                                </span>
+                                <span class="tb-tech" t-if="card.tech_initial" t-att-title="card.tech"><t t-out="card.tech_initial"/></span>
+                            </div>
+                            <div class="tb-card-money">
+                                <b><t t-out="money(card.total)"/></b>
+                                <span t-if="card.balance > 0" class="tb-flag amber">Saldo <t t-out="money(card.balance)"/></span>
+                            </div>
+                        </div>
+                        <div t-if="col.more" class="tb-more">+ <t t-out="col.more"/> más (usa la búsqueda)</div>
+                        <div t-if="!col.count" class="tb-empty">Sin órdenes</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

@@ -1,0 +1,88 @@
+<odoo>
+    <record id="view_taller_expense_list" model="ir.ui.view">
+        <field name="name">taller.expense.list</field>
+        <field name="model">taller.expense</field>
+        <field name="arch" type="xml">
+            <list>
+                <field name="date"/>
+                <field name="name"/>
+                <field name="category"/>
+                <field name="recurring"/>
+                <field name="amount" sum="Total"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_taller_expense_form" model="ir.ui.view">
+        <field name="name">taller.expense.form</field>
+        <field name="model">taller.expense</field>
+        <field name="arch" type="xml">
+            <form>
+                <sheet>
+                    <group>
+                        <group>
+                            <field name="name"/>
+                            <field name="category"/>
+                            <field name="amount"/>
+                            <field name="currency_id" invisible="1"/>
+                        </group>
+                        <group>
+                            <field name="date"/>
+                            <field name="recurring"/>
+                            <field name="end_date" invisible="not recurring"/>
+                        </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_taller_expense" model="ir.actions.act_window">
+        <field name="name">Gastos fijos</field>
+        <field name="res_model">taller.expense</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <record id="action_taller_finanzas" model="ir.actions.client">
+        <field name="name">Finanzas</field>
+        <field name="tag">taller.finanzas</field>
+    </record>
+
+    <record id="view_taller_import_wizard_form" model="ir.ui.view">
+        <field name="name">taller.import.wizard.form</field>
+        <field name="model">taller.import.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Importar clientes">
+                <group>
+                    <div class="text-muted">
+                        Columnas: nombre (obligatoria), telefono, email, direccion, documento.
+                        Acepta separador coma o punto y coma.
+                        <a href="/taller/static/description/plantilla_clientes.csv" download="plantilla_clientes.csv">Descargar plantilla</a>
+                    </div>
+                    <field name="file" filename="filename"/>
+                    <field name="filename" invisible="1"/>
+                    <field name="result" invisible="not result" nolabel="0"/>
+                </group>
+                <footer>
+                    <button name="action_import" type="object" string="Importar" class="btn-primary"
+                            invisible="result"/>
+                    <button string="Cerrar" class="btn-secondary" special="cancel"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_taller_import" model="ir.actions.act_window">
+        <field name="name">Importar clientes (CSV)</field>
+        <field name="res_model">taller.import.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_taller_finanzas" name="Finanzas" parent="menu_taller_root"
+              action="action_taller_finanzas" sequence="26" groups="group_taller_manager"/>
+    <menuitem id="menu_taller_expense" name="Gastos fijos" parent="menu_taller_config"
+              action="action_taller_expense" sequence="40" groups="group_taller_manager"/>
+    <menuitem id="menu_taller_import" name="Importar clientes (CSV)" parent="menu_taller_config"
+              action="action_taller_import" sequence="41" groups="group_taller_manager"/>
+</odoo>

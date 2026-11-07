@@ -1,0 +1,63 @@
+<odoo>
+    <record id="view_service_order_form_operations" model="ir.ui.view">
+        <field name="name">service.order.form.operations</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='status']" position="before">
+                <button name="action_whatsapp" string="Avisar por WhatsApp" type="object"
+                        icon="fa-whatsapp" invisible="not partner_id"/>
+            </xpath>
+            <xpath expr="//field[@name='date_received']" position="after">
+                <field name="promise_date"/>
+                <field name="date_ready"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_order_tree_operations" model="ir.ui.view">
+        <field name="name">service.order.tree.operations</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-danger">is_late</attribute>
+            </xpath>
+            <xpath expr="//field[@name='date_received']" position="after">
+                <field name="promise_date" optional="show"/>
+                <field name="is_late" invisible="1"/>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_order_kanban_operations" model="ir.ui.view">
+        <field name="name">service.order.kanban.operations</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//div[hasclass('oe_kanban_global_click')]" position="inside">
+                <field name="is_late" invisible="1"/>
+                <div t-if="record.is_late.raw_value" class="text-danger fw-bold">
+                    Atrasada: <field name="promise_date"/>
+                </div>
+                <div t-elif="record.promise_date.raw_value" class="text-muted">
+                    Prometida: <field name="promise_date"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_service_order_search_operations" model="ir.ui.view">
+        <field name="name">service.order.search.operations</field>
+        <field name="model">service.order</field>
+        <field name="inherit_id" ref="view_service_order_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='f_mine']" position="after">
+                <filter name="f_late" string="Atrasadas"
+                        domain="[('promise_date', '&lt;', context_today().strftime('%Y-%m-%d')), ('status', 'in', ['draft', 'diagnosing', 'quote', 'repairing'])]"/>
+                <filter name="f_unclaimed" string="Sin retirar"
+                        domain="[('status', '=', 'done'), ('date_ready', '&lt;=', (context_today() - datetime.timedelta(days=7)).strftime('%Y-%m-%d'))]"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

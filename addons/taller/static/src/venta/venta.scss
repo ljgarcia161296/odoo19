@@ -1,0 +1,55 @@
+.o_taller_venta {
+    height: 100%;
+    overflow-y: auto;
+    background: #f3f6f8;
+    padding: 18px 20px 60px;
+    color: #1b2a30;
+
+    .tv2-head { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 14px; }
+    .tv2-title { font-size: 26px; font-weight: 800; color: var(--t-primary, #0f4c5c); }
+    .tv2-sub, .tv2-muted { color: #6b7a82; font-size: 13px; }
+    .tv2-today { background: #fff; border-radius: 999px; padding: 8px 18px; box-shadow: 0 2px 10px rgba(20, 40, 50, 0.07); b { color: var(--t-primary, #0f4c5c); font-size: 18px; } }
+    .tv2-grid { display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 14px; margin-bottom: 14px; align-items: start; }
+    .tv2-card { background: #fff; border-radius: 16px; padding: 16px 18px; box-shadow: 0 2px 10px rgba(20, 40, 50, 0.07); margin-bottom: 14px; }
+    .tv2-label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: #6b7a82; font-weight: 700; margin-bottom: 8px; }
+    input[type="text"], input[type="number"] {
+        width: 100%; box-sizing: border-box; font-size: 15px; padding: 10px 12px; border: 1px solid #d3dce1; border-radius: 10px;
+        background: #f9fbfc; font-family: inherit;
+        &:focus { outline: none; background: #fff; border-color: var(--t-primary, #0f4c5c); box-shadow: 0 0 0 3px var(--t-ring, rgba(15, 76, 92, 0.14)); }
+    }
+    .tv2-search { position: relative; margin-bottom: 10px; i { position: absolute; left: 12px; top: 13px; color: #6b7a82; } input { padding-left: 34px; } }
+    .tv2-items { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 8px; max-height: 340px; overflow-y: auto; }
+    .tv2-item {
+        text-align: left; border: 1px solid #e3e9ec; background: #fff; border-radius: 12px; padding: 10px 12px; cursor: pointer;
+        display: flex; flex-direction: column; gap: 4px; min-height: 64px;
+        &:hover:not(:disabled) { background: #e8f3f5; border-color: #cfe3e8; }
+        &:disabled { opacity: 0.45; cursor: not-allowed; }
+    }
+    .tv2-item-name { font-weight: 600; }
+    .tv2-item-meta { display: flex; justify-content: space-between; align-items: center; color: var(--t-primary, #0f4c5c); small { color: #6b7a82; &.out { color: #d64545; font-weight: 700; } } }
+    .tv2-add { display: flex; gap: 8px; flex-wrap: wrap; input:first-child { flex: 1; min-width: 140px; } }
+    .tv2-price { width: 90px !important; flex: none; padding: 8px 10px !important; }
+    .tv2-btn { border: 1px solid #cfd8dd; background: #fff; border-radius: 10px; padding: 9px 14px; font-weight: 600; cursor: pointer; &:hover { background: #eef7f8; } }
+
+    .tv2-line { padding: 8px 0; border-bottom: 1px solid #eef2f4; }
+    .tv2-line-name { font-weight: 600; margin-bottom: 4px; }
+    .tv2-line-ctl { display: flex; align-items: center; gap: 8px; }
+    .tv2-round { border: 0; background: #e3eaee; width: 30px; height: 30px; border-radius: 50%; cursor: pointer; font-size: 18px; line-height: 1; }
+    .tv2-x { border: 0; background: #f7e0e0; color: #a33; border-radius: 8px; width: 30px; height: 30px; cursor: pointer; margin-left: auto; }
+    .tv2-customer { margin-top: 12px; }
+    .tv2-methods { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; margin-top: 12px; }
+    .tv2-method { border: 1px solid #d3dce1; background: #fff; border-radius: 12px; padding: 10px; font-weight: 600; cursor: pointer; &.on { background: var(--t-primary, #0f4c5c); color: #fff; border-color: var(--t-primary, #0f4c5c); } }
+    .tv2-total { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; font-size: 18px; b { font-size: 28px; color: var(--t-primary, #0f4c5c); } }
+    .tv2-confirm { width: 100%; margin-top: 12px; border: 0; background: var(--t-accent, #e8a33d); color: #1b2a30; border-radius: 14px; padding: 14px; font-size: 18px; font-weight: 800; cursor: pointer;
+        &:disabled { opacity: 0.5; cursor: not-allowed; } }
+
+    .tv2-sale { display: grid; grid-template-columns: 1fr auto auto auto; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #eef2f4;
+        &.cancel { opacity: 0.5; text-decoration: line-through; } }
+    .tv2-tag { background: #f7e0e0; color: #a33; border-radius: 999px; padding: 1px 10px; font-size: 12px; font-weight: 700; }
+}
+@media (max-width: 860px) {
+    .o_taller_venta { padding: 12px 10px 60px; }
+    .o_taller_venta .tv2-grid { grid-template-columns: 1fr; }
+    .o_taller_venta input { font-size: 16px; }
+    .o_taller_venta .tv2-sale { grid-template-columns: 1fr auto; }
+}

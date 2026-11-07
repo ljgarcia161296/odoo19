@@ -1,0 +1,69 @@
+<odoo noupdate="1">
+    <record id="chk_all_damage" model="service.checklist.item">
+        <field name="name">Golpes o daños visibles</field>
+        <field name="sequence">1</field>
+    </record>
+
+    <record id="chk_phone_1" model="service.checklist.item">
+        <field name="name">Enciende</field><field name="sequence">10</field><field name="device_type">phone</field>
+    </record>
+    <record id="chk_phone_2" model="service.checklist.item">
+        <field name="name">Pantalla y táctil</field><field name="sequence">11</field><field name="device_type">phone</field>
+    </record>
+    <record id="chk_phone_3" model="service.checklist.item">
+        <field name="name">Cámaras</field><field name="sequence">12</field><field name="device_type">phone</field>
+    </record>
+    <record id="chk_phone_4" model="service.checklist.item">
+        <field name="name">Altavoz y micrófono</field><field name="sequence">13</field><field name="device_type">phone</field>
+    </record>
+    <record id="chk_phone_5" model="service.checklist.item">
+        <field name="name">Carga</field><field name="sequence">14</field><field name="device_type">phone</field>
+    </record>
+    <record id="chk_phone_6" model="service.checklist.item">
+        <field name="name">Botones físicos</field><field name="sequence">15</field><field name="device_type">phone</field>
+    </record>
+    <record id="chk_phone_7" model="service.checklist.item">
+        <field name="name">Wi-Fi y datos</field><field name="sequence">16</field><field name="device_type">phone</field>
+    </record>
+    <record id="chk_phone_8" model="service.checklist.item">
+        <field name="name">SIM / lector</field><field name="sequence">17</field><field name="device_type">phone</field>
+    </record>
+
+    <record id="chk_pc_1" model="service.checklist.item">
+        <field name="name">Enciende</field><field name="sequence">10</field><field name="device_type">computer</field>
+    </record>
+    <record id="chk_pc_2" model="service.checklist.item">
+        <field name="name">Pantalla</field><field name="sequence">11</field><field name="device_type">computer</field>
+    </record>
+    <record id="chk_pc_3" model="service.checklist.item">
+        <field name="name">Teclado</field><field name="sequence">12</field><field name="device_type">computer</field>
+    </record>
+    <record id="chk_pc_4" model="service.checklist.item">
+        <field name="name">Touchpad o mouse</field><field name="sequence">13</field><field name="device_type">computer</field>
+    </record>
+    <record id="chk_pc_5" model="service.checklist.item">
+        <field name="name">Puertos USB</field><field name="sequence">14</field><field name="device_type">computer</field>
+    </record>
+    <record id="chk_pc_6" model="service.checklist.item">
+        <field name="name">Wi-Fi</field><field name="sequence">15</field><field name="device_type">computer</field>
+    </record>
+    <record id="chk_pc_7" model="service.checklist.item">
+        <field name="name">Batería y carga</field><field name="sequence">16</field><field name="device_type">computer</field>
+    </record>
+    <record id="chk_pc_8" model="service.checklist.item">
+        <field name="name">Audio</field><field name="sequence">17</field><field name="device_type">computer</field>
+    </record>
+    <record id="chk_pc_9" model="service.checklist.item">
+        <field name="name">Disco y arranque</field><field name="sequence">18</field><field name="device_type">computer</field>
+    </record>
+
+    <record id="chk_tablet_1" model="service.checklist.item">
+        <field name="name">Enciende</field><field name="sequence">10</field><field name="device_type">tablet</field>
+    </record>
+    <record id="chk_tablet_2" model="service.checklist.item">
+        <field name="name">Pantalla y táctil</field><field name="sequence">11</field><field name="device_type">tablet</field>
+    </record>
+    <record id="chk_tablet_3" model="service.checklist.item">
+        <field name="name">Carga</field><field name="sequence">12</field><field name="device_type">tablet</field>
+    </record>
+</odoo>

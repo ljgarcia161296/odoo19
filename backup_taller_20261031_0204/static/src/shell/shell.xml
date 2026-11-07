@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <t t-name="taller.Shell">
+        <div class="ts-root">
+            <aside t-if="state.visible" t-attf-class="ts-sidebar #{state.collapsed ? 'collapsed' : ''}">
+                <div class="ts-brand">
+                    <img class="ts-logo" src="/web/binary/company_logo" alt="Logo"
+                         onerror="this.style.display='none'"/>
+                    <span class="ts-brand-name">Taller</span>
+                </div>
+                <button class="ts-searchbtn" t-on-click="openSearch" title="Buscar (Ctrl+K)">
+                    <i class="fa fa-search"/>
+                    <span class="ts-label">Buscar...</span>
+                    <kbd class="ts-label">Ctrl K</kbd>
+                </button>
+                <nav class="ts-nav">
+                    <t t-foreach="items" t-as="item" t-key="item.id">
+                        <div t-attf-class="ts-item #{isActive(item) or isGroupActive(item) ? 'active' : ''}"
+                             t-on-click="() => this.clickItem(item)" t-att-title="item.name">
+                            <i t-attf-class="fa #{item.icon}"/>
+                            <span class="ts-label"><t t-out="item.name"/></span>
+                            <i t-if="item.children.length"
+                               t-attf-class="fa ts-chev ts-label #{isOpen(item) ? 'fa-angle-up' : 'fa-angle-down'}"/>
+                        </div>
+                        <div t-if="item.children.length and isOpen(item) and !state.collapsed" class="ts-sub">
+                            <div t-foreach="item.children" t-as="child" t-key="child.id"
+                                 t-attf-class="ts-subitem #{isActive(child) ? 'active' : ''}"
+                                 t-on-click="() => this.clickChild(child)">
+                                <t t-out="child.name"/>
+                            </div>
+                        </div>
+                    </t>
+                </nav>
+                <button class="ts-collapse" t-on-click="toggleCollapsed" title="Ocultar o mostrar el menú">
+                    <i t-attf-class="fa #{state.collapsed ? 'fa-angle-double-right' : 'fa-angle-double-left'}"/>
+                    <span class="ts-label">Ocultar menú</span>
+                </button>
+            </aside>
+
+            <div t-if="state.search.open" class="ts-overlay" t-on-click="closeSearch">
+                <div class="ts-modal" t-on-click.stop="">
+                    <div class="ts-modal-head">
+                        <i class="fa fa-search"/>
+                        <input class="ts-search-input" type="text" autocomplete="off"
+                               placeholder="Buscar órdenes, clientes, teléfonos o IMEI..."
+                               t-att-value="state.search.query" t-on-input="onQuery" t-on-keydown="onSearchKey"/>
+                        <kbd>Esc</kbd>
+                    </div>
+                    <div class="ts-results">
+                        <div t-foreach="results" t-as="res" t-key="res_index"
+                             t-attf-class="ts-result #{res_index === state.search.index ? 'on' : ''}"
+                             t-on-click="() => this.run(res)">
+                            <i t-attf-class="fa #{res.icon}"/>
+                            <div>
+                                <div class="ts-result-label"><t t-out="res.label"/></div>
+                                <div class="ts-result-sub"><t t-out="res.sub"/></div>
+                            </div>
+                        </div>
+                        <div t-if="state.search.query.trim().length >= 2 and !results.length" class="ts-none">
+                            Sin resultados.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </t>
+</templates>

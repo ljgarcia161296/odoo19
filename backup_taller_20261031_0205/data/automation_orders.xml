@@ -1,0 +1,15 @@
+<odoo noupdate="1">
+    <record id="param_unclaimed_days" model="ir.config_parameter">
+        <field name="key">taller.unclaimed_days</field>
+        <field name="value">7</field>
+    </record>
+
+    <record id="cron_unclaimed_orders" model="ir.cron">
+        <field name="name">Taller: equipos sin retirar</field>
+        <field name="model_id" ref="model_service_order"/>
+        <field name="state">code</field>
+        <field name="code">model._cron_unclaimed_orders()</field>
+        <field name="interval_number">1</field>
+        <field name="interval_type">days</field>
+    </record>
+</odoo>

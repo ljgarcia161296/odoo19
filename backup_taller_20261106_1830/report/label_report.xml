@@ -1,0 +1,84 @@
+<odoo>
+    <record id="paperformat_label" model="report.paperformat">
+        <field name="name">Etiqueta 62x29</field>
+        <field name="default" eval="False"/>
+        <field name="format">custom</field>
+        <field name="page_height">29</field>
+        <field name="page_width">62</field>
+        <field name="orientation">Portrait</field>
+        <field name="margin_top">1</field>
+        <field name="margin_bottom">1</field>
+        <field name="margin_left">1</field>
+        <field name="margin_right">1</field>
+        <field name="header_line" eval="False"/>
+        <field name="header_spacing">0</field>
+        <field name="dpi">96</field>
+    </record>
+
+    <record id="action_report_label" model="ir.actions.report">
+        <field name="name">Etiqueta de equipo</field>
+        <field name="model">service.order</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">taller.report_label</field>
+        <field name="report_file">taller.report_label</field>
+        <field name="paperformat_id" ref="paperformat_label"/>
+        <field name="print_report_name">'Etiqueta-%s' % (object.name.replace('/', '-'))</field>
+        <field name="binding_model_id" ref="model_service_order"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_label">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.basic_layout">
+                    <div class="page" style="font-size: 11px; line-height: 1.2;">
+                        <table style="width: 100%;">
+                            <tr>
+                                <td style="width: 38%;">
+                                    <img t-att-src="'/report/barcode/?barcode_type=QR&amp;value=%s&amp;width=150&amp;height=150' % o.qr_value"
+                                         style="width: 80px; height: 80px;"/>
+                                </td>
+                                <td style="vertical-align: middle;">
+                                    <strong style="font-size: 15px;"><span t-field="o.name"/></strong><br/>
+                                    <span t-field="o.customer_name"/><br/>
+                                    <span t-field="o.device_brand"/> <span t-field="o.device_model"/>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+
+    <template id="report_service_order_labels" inherit_id="report_service_order">
+        <xpath expr="//div[hasclass('page')]/h2" position="before">
+            <img t-att-src="'/report/barcode/?barcode_type=QR&amp;value=%s&amp;width=150&amp;height=150' % o.qr_value"
+                 style="float: right; width: 90px; height: 90px;"/>
+        </xpath>
+        <xpath expr="//div[hasclass('page')]" position="inside">
+            <t t-if="o.photo_ids">
+                <h5>Fotos del equipo</h5>
+                <div>
+                    <t t-foreach="o.photo_ids" t-as="p">
+                        <div style="display: inline-block; margin: 4px; text-align: center; font-size: 11px;">
+                            <img t-att-src="image_data_uri(p.image)" style="max-height: 120px; max-width: 160px;"/>
+                            <div><span t-field="p.name"/></div>
+                        </div>
+                    </t>
+                </div>
+            </t>
+            <t t-if="o.status in ('done', 'delivered')">
+                <div class="mt-4">
+                    <t t-if="o.delivery_signature">
+                        <img t-att-src="image_data_uri(o.delivery_signature)" style="max-height: 70px;"/><br/>
+                    </t>
+                    <t t-else="">
+                        <br/><br/>______________________<br/>
+                    </t>
+                    Firma de quien retira<t t-if="o.delivery_signed_by">: <span t-field="o.delivery_signed_by"/></t>
+                </div>
+            </t>
+        </xpath>
+    </template>
+</odoo>
